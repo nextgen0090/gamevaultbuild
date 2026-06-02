@@ -1,2 +1,0 @@
-# Local wrangler dev only — copy to .dev.vars
-ORIGIN_BASE_URL=http://ec2-54-91-135-167.compute-1.amazonaws.com
