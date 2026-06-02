@@ -1,6 +1,12 @@
-const AWS_ORIGIN = "http://54.91.135.167";
+/**
+ * Proxy /api, /ws, /webhook to AWS.
+ * Workers cannot fetch bare IPs (Cloudflare error 1003).
+ * Set ORIGIN_BASE_URL to your EC2 public DNS (no extra Cloudflare subdomain needed).
+ * Example: http://ec2-54-91-135-167.compute-1.amazonaws.com
+ */
+const FALLBACK_ORIGIN = "http://54.91.135.167";
 
-const BACKEND_PREFIXES = ["/api", "/ws", "/webhook", "/adminPanel"];
+const BACKEND_PREFIXES = ["/api", "/ws", "/webhook"];
 
 function isBackendPath(pathname) {
   const lower = pathname.toLowerCase();
@@ -11,9 +17,10 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const path = url.pathname;
+    const originBase = (env.ORIGIN_BASE_URL || FALLBACK_ORIGIN).replace(/\/$/, "");
 
     if (isBackendPath(path)) {
-      const targetUrl = new URL(AWS_ORIGIN);
+      const targetUrl = new URL(originBase);
       targetUrl.pathname = path;
       targetUrl.search = url.search;
 
