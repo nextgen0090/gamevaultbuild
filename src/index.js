@@ -1,19 +1,10 @@
-const API_ORIGIN = "https://gamevault222.com";
-
+/**
+ * Serves Unity WebGL static assets only.
+ * /api, /adminPanel, /ws, /webhook bypass the Worker via Cloudflare Routes
+ * and hit AWS nginx directly.
+ */
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
-    const path = url.pathname;
-    if (
-      path.startsWith("/api") ||
-      path.startsWith("/ws") ||
-      path.startsWith("/webhook") ||
-      path.startsWith("/adminPanel") ||
-      path.toLowerCase().startsWith("/adminpanel")
-    ) {
-      const target = API_ORIGIN + path + url.search;
-      return fetch(new Request(target, request));
-    }
     return env.ASSETS.fetch(request);
   },
 };
