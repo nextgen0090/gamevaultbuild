@@ -859,24 +859,25 @@
         return Math.min(mapUnityLoaderProgressToUi(unityProgress), UI_PROGRESS_DURING_DOWNLOAD_MAX);
       }
 
-      function prefetchBuildAssetSizes() {
+      function startBuildLoadTracking() {
         buildLoadTrackingStarted = true;
         startBuildResourceTimingPoll();
-        var assets = [
-          { key: "loader", url: loaderUrl },
-          { key: "data", url: buildUrl + "/Builds.data.unityweb" + buildQuery },
-          { key: "framework", url: buildUrl + "/Builds.framework.js.unityweb" + buildQuery },
-          { key: "wasm", url: buildUrl + "/Builds.wasm.unityweb" + buildQuery }
+      }
+
+      function injectBuildPreloads() {
+        var preloadUrls = [
+          { href: loaderUrl, as: "script" },
+          { href: buildUrl + "/Builds.framework.js.unityweb" + buildQuery, as: "fetch", crossOrigin: true },
+          { href: buildUrl + "/Builds.data.unityweb" + buildQuery, as: "fetch", crossOrigin: true },
+          { href: buildUrl + "/Builds.wasm.unityweb" + buildQuery, as: "fetch", crossOrigin: true }
         ];
-        assets.forEach(function (asset) {
-          fetch(asset.url, { method: "HEAD", cache: "no-store" }).then(function (res) {
-            if (!res.ok) return;
-            var cl = parseInt(res.headers.get("Content-Length") || "0", 10) || 0;
-            if (cl > 0) {
-              unityAssetByteState[asset.key].headerTotal = cl;
-              applyLoaderUiProgress(lastUnityLoaderProgressForUi);
-            }
-          }).catch(function () {});
+        preloadUrls.forEach(function (item) {
+          var link = document.createElement("link");
+          link.rel = "preload";
+          link.href = item.href;
+          link.as = item.as;
+          if (item.crossOrigin) link.crossOrigin = "anonymous";
+          document.head.appendChild(link);
         });
       }
 
@@ -981,17 +982,19 @@
           if (url.endsWith('.bundle')) {
             return "must-revalidate";
           }
-          if (url.endsWith('.data.unityweb') ||
+          if (url.endsWith('.loader.js') ||
+              url.endsWith('.data.unityweb') ||
               url.endsWith('.wasm.unityweb') ||
               url.endsWith('.framework.js.unityweb')) {
-            return "must-revalidate";
+            return "immutable";
           }
-          return "no-store";
+          return "immutable";
         },
       };
 
       installUnityMainAssetFetchTracker();
-      prefetchBuildAssetSizes();
+      injectBuildPreloads();
+      startBuildLoadTracking();
 
       var meta = document.createElement('meta');
       meta.name = 'viewport';
@@ -1478,34 +1481,30 @@
         }
       });
 
-      function loadTrackedBuildLoaderScript(onReady) {
+      function loadBuildLoaderScript(onReady) {
         buildLoadTrackingStarted = true;
         startBuildResourceTimingPoll();
-        fetch(loaderUrl, { cache: "no-store" })
-          .then(function (res) {
-            if (!res.ok) throw new Error("loader fetch failed");
-            return wrapUnityMainAssetResponseBody("loader", res).text();
-          })
-          .then(function (code) {
-            var st = unityAssetByteState.loader;
-            st.done = true;
-            if (st.headerTotal > 0) st.loaded = st.headerTotal;
-            else st.loaded = Math.max(st.loaded, code.length);
-            notifyUnityMainAssetByteProgress();
-            var script = document.createElement("script");
-            script.textContent = code;
-            document.body.appendChild(script);
-            onReady();
-          })
-          .catch(function () {
-            showCasinoMaintenancePage();
-          });
+        var script = document.createElement("script");
+        script.src = loaderUrl;
+        script.async = false;
+        script.onload = function () {
+          var st = unityAssetByteState.loader;
+          st.done = true;
+          if (st.headerTotal > 0) st.loaded = st.headerTotal;
+          else st.loaded = UNITY_ASSET_FALLBACK_BYTES.loader;
+          notifyUnityMainAssetByteProgress();
+          onReady();
+        };
+        script.onerror = function () {
+          showCasinoMaintenancePage();
+        };
+        document.body.appendChild(script);
       }
 
       function startUnityGame() {
         if (_maintenanceActive) return;
 
-        loadTrackedBuildLoaderScript(function () {
+        loadBuildLoaderScript(function () {
           if (_maintenanceActive) return;
           createUnityInstance(canvas, config, function (progress) {
             if (_maintenanceActive) return;
