@@ -5,6 +5,18 @@
  */
 export default {
   async fetch(request, env) {
-    return env.ASSETS.fetch(request);
+    const response = await env.ASSETS.fetch(request);
+    const path = new URL(request.url).pathname;
+    // Unity .unityweb files are gzip-compressed; header enables faster startup.
+    if (path.endsWith(".unityweb")) {
+      const headers = new Headers(response.headers);
+      headers.set("Content-Encoding", "gzip");
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      });
+    }
+    return response;
   },
 };
