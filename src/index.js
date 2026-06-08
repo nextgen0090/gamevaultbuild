@@ -1,4 +1,4 @@
-const API_ORIGIN = "https://api.gamevault222.com";
+const API_ORIGIN = "https://gamevault222.com";
 
 export default {
   async fetch(request, env) {
