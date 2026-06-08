@@ -179,6 +179,7 @@
     <type fullname="FavoriteAnimationSpawner" preserve="all" />
     <type fullname="FeedbackPanel" preserve="all" />
     <type fullname="FeedbackStar" preserve="all" />
+    <type fullname="FeedbackTextPreset" preserve="all" />
     <type fullname="Fish" preserve="all" />
     <type fullname="FishDatabase" preserve="all" />
     <type fullname="FishGameSoundManager" preserve="all" />
