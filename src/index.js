@@ -1,33 +1,18 @@
-const AWS_ORIGIN = "http://origin.gamevault222.com";
-
-function shouldSendToAws(pathname) {
-  return (
-    pathname === "/api" ||
-    pathname.startsWith("/api/") ||
-    pathname === "/ws" ||
-    pathname.startsWith("/ws/") ||
-    pathname === "/webhook" ||
-    pathname.startsWith("/webhook/") ||
-    pathname === "/adminPanel" ||
-    pathname.startsWith("/adminPanel/") ||
-    pathname === "/adminpanel" ||
-    pathname.startsWith("/adminpanel/")
-  );
-}
+const API_ORIGIN = "https://api.gamevault222.com";
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (shouldSendToAws(url.pathname)) {
-      const targetUrl = new URL(url.pathname + url.search, AWS_ORIGIN);
-      return fetch(
-        new Request(targetUrl.toString(), {
-          method: request.method,
-          headers: request.headers,
-          body: request.body,
-          redirect: "manual",
-        })
-      );
+    const path = url.pathname;
+    if (
+      path.startsWith("/api") ||
+      path.startsWith("/ws") ||
+      path.startsWith("/webhook") ||
+      path.startsWith("/adminPanel") ||
+      path.toLowerCase().startsWith("/adminpanel")
+    ) {
+      const target = API_ORIGIN + path + url.search;
+      return fetch(new Request(target, request));
     }
     return env.ASSETS.fetch(request);
   },

@@ -853,41 +853,38 @@
         if (_postDownloadPhase) return 1.0;
 
         var netRatio = getUnityNetworkLoadedRatio();
-        var unityTarget = mapUnityLoaderProgressToUi(unityProgress);
         if (netRatio != null) {
-          var byteTarget = netRatio * UI_PROGRESS_DURING_DOWNLOAD_MAX;
-          // Never show more progress than bytes actually downloaded.
-          return Math.min(byteTarget, unityTarget, UI_PROGRESS_DURING_DOWNLOAD_MAX);
+          return Math.min(netRatio * UI_PROGRESS_DURING_DOWNLOAD_MAX, UI_PROGRESS_DURING_DOWNLOAD_MAX);
         }
-        return Math.min(unityTarget, UI_PROGRESS_DURING_DOWNLOAD_MAX);
+        return Math.min(mapUnityLoaderProgressToUi(unityProgress), UI_PROGRESS_DURING_DOWNLOAD_MAX);
       }
 
-      function startBuildLoadTracking() {
+      function prefetchBuildAssetSizes() {
         buildLoadTrackingStarted = true;
         startBuildResourceTimingPoll();
-      }
-
-      function injectBuildPreloads() {
-        var preloadUrls = [
-          { href: loaderUrl, as: "script" },
-          { href: buildUrl + "/Builds.framework.js.unityweb" + buildQuery, as: "fetch", crossOrigin: true },
-          { href: buildUrl + "/Builds.data.unityweb" + buildQuery, as: "fetch", crossOrigin: true },
-          { href: buildUrl + "/Builds.wasm.unityweb" + buildQuery, as: "fetch", crossOrigin: true }
+        var assets = [
+          { key: "loader", url: loaderUrl },
+          { key: "data", url: buildUrl + "/Builds.data.unityweb" + buildQuery },
+          { key: "framework", url: buildUrl + "/Builds.framework.js.unityweb" + buildQuery },
+          { key: "wasm", url: buildUrl + "/Builds.wasm.unityweb" + buildQuery }
         ];
-        preloadUrls.forEach(function (item) {
-          var link = document.createElement("link");
-          link.rel = "preload";
-          link.href = item.href;
-          link.as = item.as;
-          if (item.crossOrigin) link.crossOrigin = "anonymous";
-          document.head.appendChild(link);
+        assets.forEach(function (asset) {
+          fetch(asset.url, { method: "HEAD", cache: "no-store" }).then(function (res) {
+            if (!res.ok) return;
+            var cl = parseInt(res.headers.get("Content-Length") || "0", 10) || 0;
+            if (cl > 0) {
+              unityAssetByteState[asset.key].headerTotal = cl;
+              applyLoaderUiProgress(lastUnityLoaderProgressForUi);
+            }
+          }).catch(function () {});
         });
       }
 
       function canStartPostDownloadRamp(unityProgress) {
-        // Stay on real download progress until every Build file is fetched AND Unity is initialized.
-        // Unity's loader often reports 0.9 while Builds.data.unityweb is still downloading.
-        return buildDownloadsReadyForInit() && _unityInstanceReady;
+        if (buildDownloadsReadyForInit()) return true;
+        if (_unityInstanceReady) return true;
+        if (unityProgress >= UNITY_DOWNLOAD_PROGRESS_MAX) return true;
+        return false;
       }
 
       function ensurePostDownloadRamp() {
@@ -908,13 +905,13 @@
         if (_loaderHidden) return;
 
         if (!_postDownloadPhase) {
+          if (canStartPostDownloadRamp(unityProgress)) {
+            ensurePostDownloadRamp();
+            return;
+          }
           var target = combinedLoaderUiTarget(unityProgress);
           if (target < smoothProgress.targetValue) target = smoothProgress.targetValue;
           smoothProgress.setTarget(target);
-
-          if (canStartPostDownloadRamp(unityProgress)) {
-            ensurePostDownloadRamp();
-          }
           return;
         }
 
@@ -984,19 +981,17 @@
           if (url.endsWith('.bundle')) {
             return "must-revalidate";
           }
-          if (url.endsWith('.loader.js') ||
-              url.endsWith('.data.unityweb') ||
+          if (url.endsWith('.data.unityweb') ||
               url.endsWith('.wasm.unityweb') ||
               url.endsWith('.framework.js.unityweb')) {
-            return "immutable";
+            return "must-revalidate";
           }
-          return "immutable";
+          return "no-store";
         },
       };
 
       installUnityMainAssetFetchTracker();
-      injectBuildPreloads();
-      startBuildLoadTracking();
+      prefetchBuildAssetSizes();
 
       var meta = document.createElement('meta');
       meta.name = 'viewport';
@@ -1483,30 +1478,34 @@
         }
       });
 
-      function loadBuildLoaderScript(onReady) {
+      function loadTrackedBuildLoaderScript(onReady) {
         buildLoadTrackingStarted = true;
         startBuildResourceTimingPoll();
-        var script = document.createElement("script");
-        script.src = loaderUrl;
-        script.async = false;
-        script.onload = function () {
-          var st = unityAssetByteState.loader;
-          st.done = true;
-          if (st.headerTotal > 0) st.loaded = st.headerTotal;
-          else st.loaded = Math.max(st.loaded, UNITY_ASSET_FALLBACK_BYTES.loader);
-          notifyUnityMainAssetByteProgress();
-          onReady();
-        };
-        script.onerror = function () {
-          showCasinoMaintenancePage();
-        };
-        document.body.appendChild(script);
+        fetch(loaderUrl, { cache: "no-store" })
+          .then(function (res) {
+            if (!res.ok) throw new Error("loader fetch failed");
+            return wrapUnityMainAssetResponseBody("loader", res).text();
+          })
+          .then(function (code) {
+            var st = unityAssetByteState.loader;
+            st.done = true;
+            if (st.headerTotal > 0) st.loaded = st.headerTotal;
+            else st.loaded = Math.max(st.loaded, code.length);
+            notifyUnityMainAssetByteProgress();
+            var script = document.createElement("script");
+            script.textContent = code;
+            document.body.appendChild(script);
+            onReady();
+          })
+          .catch(function () {
+            showCasinoMaintenancePage();
+          });
       }
 
       function startUnityGame() {
         if (_maintenanceActive) return;
 
-        loadBuildLoaderScript(function () {
+        loadTrackedBuildLoaderScript(function () {
           if (_maintenanceActive) return;
           createUnityInstance(canvas, config, function (progress) {
             if (_maintenanceActive) return;
