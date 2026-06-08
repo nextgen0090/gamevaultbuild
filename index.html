@@ -853,10 +853,13 @@
         if (_postDownloadPhase) return 1.0;
 
         var netRatio = getUnityNetworkLoadedRatio();
+        var unityTarget = mapUnityLoaderProgressToUi(unityProgress);
         if (netRatio != null) {
-          return Math.min(netRatio * UI_PROGRESS_DURING_DOWNLOAD_MAX, UI_PROGRESS_DURING_DOWNLOAD_MAX);
+          var byteTarget = netRatio * UI_PROGRESS_DURING_DOWNLOAD_MAX;
+          // Never show more progress than bytes actually downloaded.
+          return Math.min(byteTarget, unityTarget, UI_PROGRESS_DURING_DOWNLOAD_MAX);
         }
-        return Math.min(mapUnityLoaderProgressToUi(unityProgress), UI_PROGRESS_DURING_DOWNLOAD_MAX);
+        return Math.min(unityTarget, UI_PROGRESS_DURING_DOWNLOAD_MAX);
       }
 
       function startBuildLoadTracking() {
@@ -882,10 +885,9 @@
       }
 
       function canStartPostDownloadRamp(unityProgress) {
-        if (buildDownloadsReadyForInit()) return true;
-        if (_unityInstanceReady) return true;
-        if (unityProgress >= UNITY_DOWNLOAD_PROGRESS_MAX) return true;
-        return false;
+        // Stay on real download progress until every Build file is fetched AND Unity is initialized.
+        // Unity's loader often reports 0.9 while Builds.data.unityweb is still downloading.
+        return buildDownloadsReadyForInit() && _unityInstanceReady;
       }
 
       function ensurePostDownloadRamp() {
@@ -906,13 +908,13 @@
         if (_loaderHidden) return;
 
         if (!_postDownloadPhase) {
-          if (canStartPostDownloadRamp(unityProgress)) {
-            ensurePostDownloadRamp();
-            return;
-          }
           var target = combinedLoaderUiTarget(unityProgress);
           if (target < smoothProgress.targetValue) target = smoothProgress.targetValue;
           smoothProgress.setTarget(target);
+
+          if (canStartPostDownloadRamp(unityProgress)) {
+            ensurePostDownloadRamp();
+          }
           return;
         }
 
@@ -1491,7 +1493,7 @@
           var st = unityAssetByteState.loader;
           st.done = true;
           if (st.headerTotal > 0) st.loaded = st.headerTotal;
-          else st.loaded = UNITY_ASSET_FALLBACK_BYTES.loader;
+          else st.loaded = Math.max(st.loaded, UNITY_ASSET_FALLBACK_BYTES.loader);
           notifyUnityMainAssetByteProgress();
           onReady();
         };
