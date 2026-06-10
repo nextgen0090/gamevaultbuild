@@ -499,10 +499,13 @@
       var UI_PROGRESS_DURING_DOWNLOAD_MAX = 0.9;
       var UI_NETWORK_COMPLETE_RATIO = 0.995;
       var LOADER_HOLD_AT_100_MS = 600;
-      // Max UI progress increase er animation frame (prevents jumps to 100%).
-      var UI_PROGRESS_MAX_STEP_PER_FRAME = 0.01;
-      // Faster final ramp once Unity is ready (avoids video/game playing behind loader too long).
-      var UI_POST_DOWNLOAD_MAX_STEP_PER_FRAME = 0.028;
+      // Minimum time to visually reach 90% / 100% (cached or fast networks report all bytes at once).
+      var LOADER_MIN_DOWNLOAD_PHASE_MS = 5000;
+      var LOADER_MIN_POST_DOWNLOAD_PHASE_MS = 1500;
+      // Max UI progress increase per animation frame (prevents jumps to 100%).
+      var UI_PROGRESS_MAX_STEP_PER_FRAME = 0.008;
+      // Final ramp once Unity is ready (kept slower so 90–100% does not flash by).
+      var UI_POST_DOWNLOAD_MAX_STEP_PER_FRAME = 0.012;
 
       function mapUnityLoaderProgressToUi(unityProgress) {
         var p = Math.min(Math.max(unityProgress, 0), UNITY_DOWNLOAD_PROGRESS_MAX);
@@ -529,6 +532,43 @@
       var _loaderHidden = false;
       var _loaderHideScheduled = false;
       var _loaderForceHideTimer = null;
+      var _loaderProgressStartMs = null;
+      var _loaderTimeCapTickId = null;
+
+      function stopLoaderTimeCapTick() {
+        if (_loaderTimeCapTickId != null) {
+          cancelAnimationFrame(_loaderTimeCapTickId);
+          _loaderTimeCapTickId = null;
+        }
+      }
+
+      function startLoaderTimeCapTick() {
+        if (_loaderTimeCapTickId != null) return;
+        function tick() {
+          if (_loaderHidden) {
+            stopLoaderTimeCapTick();
+            return;
+          }
+          applyLoaderUiProgress(lastUnityLoaderProgressForUi);
+          _loaderTimeCapTickId = requestAnimationFrame(tick);
+        }
+        _loaderTimeCapTickId = requestAnimationFrame(tick);
+      }
+
+      function getLoaderProgressTimeCap() {
+        if (_loaderProgressStartMs == null) _loaderProgressStartMs = performance.now();
+        var elapsed = performance.now() - _loaderProgressStartMs;
+        if (elapsed <= LOADER_MIN_DOWNLOAD_PHASE_MS) {
+          return (elapsed / LOADER_MIN_DOWNLOAD_PHASE_MS) * UI_PROGRESS_DURING_DOWNLOAD_MAX;
+        }
+        var postElapsed = elapsed - LOADER_MIN_DOWNLOAD_PHASE_MS;
+        var postRatio = Math.min(1, postElapsed / LOADER_MIN_POST_DOWNLOAD_PHASE_MS);
+        return UI_PROGRESS_DURING_DOWNLOAD_MAX + postRatio * (1 - UI_PROGRESS_DURING_DOWNLOAD_MAX);
+      }
+
+      function capLoaderUiTarget(rawTarget) {
+        return Math.min(rawTarget, getLoaderProgressTimeCap());
+      }
 
       function unityMainAssetKeyFromPathname(pathname) {
         if (!pathname) return null;
@@ -898,7 +938,7 @@
           if (progressSpeedEl) progressSpeedEl.style.display = "none";
         }
 
-        smoothProgress.setTarget(1.0);
+        smoothProgress.setTarget(capLoaderUiTarget(1.0));
         pollLoaderHideWhenReady();
       }
 
@@ -910,7 +950,7 @@
             ensurePostDownloadRamp();
             return;
           }
-          var target = combinedLoaderUiTarget(unityProgress);
+          var target = capLoaderUiTarget(combinedLoaderUiTarget(unityProgress));
           if (target < smoothProgress.targetValue) target = smoothProgress.targetValue;
           smoothProgress.setTarget(target);
           return;
@@ -1059,7 +1099,9 @@
       canvas.classList.add("unity-canvas-loading");
       canvas.style.visibility = "hidden";
       canvas.style.opacity = "0";
+      _loaderProgressStartMs = performance.now();
       smoothProgress.setImmediate(0);
+      startLoaderTimeCapTick();
 
       _loaderForceHideTimer = setTimeout(function () {
         if (!_loaderHidden) hideUnityLoader();
@@ -1307,6 +1349,7 @@
         if (_loaderHidden || _maintenanceActive) return;
         _loaderHidden = true;
         _loaderHideScheduled = true;
+        stopLoaderTimeCapTick();
         if (_loaderForceHideTimer != null) {
           clearTimeout(_loaderForceHideTimer);
           _loaderForceHideTimer = null;
@@ -2244,12 +2287,59 @@
         return false;
       }
 
-      /* Scheduled maintenance: use nginx/Cloudflare to serve maintenance.html (see nginx-casino.conf
-         error_page) or call window.showCasinoMaintenancePage() — no /api/maintenance on load
-         (that endpoint was causing ERR_CONNECTION_RESET and blocking the game). */
+      var MAINTENANCE_FETCH_RETRIES = 3;
+      var MAINTENANCE_FETCH_RETRY_MS = 600;
+
+      function fetchMaintenanceStatus(attempt) {
+        var base = getApiBase();
+        var cacheBust = '_cb=' + Date.now();
+        return fetch(base + '/api/maintenance?' + cacheBust, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          },
+          cache: 'no-store',
+          mode: 'cors',
+          credentials: 'omit'
+        }).then(function (res) {
+          if (res.status !== 200) {
+            var err = new Error('maintenance status ' + res.status);
+            err.retryable = res.status >= 500 || res.status === 429;
+            throw err;
+          }
+          return res.json();
+        }).catch(function (err) {
+          if (attempt < MAINTENANCE_FETCH_RETRIES && (!err || err.retryable !== false)) {
+            return new Promise(function (resolve) {
+              setTimeout(resolve, MAINTENANCE_FETCH_RETRY_MS * attempt);
+            }).then(function () {
+              return fetchMaintenanceStatus(attempt + 1);
+            });
+          }
+          throw err;
+        });
+      }
+
+      function checkMaintenance() {
+        fetchMaintenanceStatus(1).then(function (json) {
+          if (isCasinoMaintenanceActive(json)) {
+            showCasinoMaintenancePage();
+          } else {
+            startUnityGame();
+          }
+        }).catch(function () {
+          /* Network reset / API down: start game so a flaky check does not block play.
+             Real maintenance still applies when the API returns 200 with active rows. */
+          startUnityGame();
+        });
+      }
+
       window.showCasinoMaintenancePage = showCasinoMaintenancePage;
 
-      startUnityGame();
+      prefetchMaintenanceHtml();
+      checkMaintenance();
 
     </script>
   </body>
