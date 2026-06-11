@@ -470,19 +470,12 @@
       );
 
       
-      var UNITY_LOADER_MB = 0.35;
-      var UNITY_DATA_MB = 18.9;
-      var UNITY_FRAMEWORK_MB = 13.47;
-      var UNITY_WASM_MB = 12.5;
       // Logo PNG letterboxing within the fill container (clip-path uses box, not art bounds).
       var LOGO_CLIP_TOP_EMPTY_PERCENT = 11;
       var LOGO_CLIP_BOTTOM_EMPTY_PERCENT = 6;
       var BUILD_ASSET_KEYS = ["loader", "data", "framework", "wasm"];
       var buildLoadTrackingStarted = false;
       var buildResourcePollId = null;
-      var totalDownloadBytes = (UNITY_LOADER_MB + UNITY_DATA_MB + UNITY_FRAMEWORK_MB + UNITY_WASM_MB) * 1024 * 1024;
-      var lastProgressTime = null;
-      var lastProgressValue = 0;
       var currentDownloadSpeedBps = 0;
 
       function formatSpeed(bytesPerSecond) {
@@ -497,15 +490,9 @@
       var UNITY_DOWNLOAD_PROGRESS_MAX = 0.9;
       // Real bytes → 0–90% UI; after all build files finish → smooth 90–100%; hide loader then show canvas.
       var UI_PROGRESS_DURING_DOWNLOAD_MAX = 0.9;
-      var UI_NETWORK_COMPLETE_RATIO = 0.995;
       var LOADER_HOLD_AT_100_MS = 600;
-      // Minimum time to visually reach 90% / 100% (cached or fast networks report all bytes at once).
-      var LOADER_MIN_DOWNLOAD_PHASE_MS = 5000;
-      var LOADER_MIN_POST_DOWNLOAD_PHASE_MS = 1500;
-      // Max UI progress increase per animation frame (prevents jumps to 100%).
-      var UI_PROGRESS_MAX_STEP_PER_FRAME = 0.008;
-      // Final ramp once Unity is ready (kept slower so 90–100% does not flash by).
-      var UI_POST_DOWNLOAD_MAX_STEP_PER_FRAME = 0.012;
+      // Smooth 90–100% init phase; download phase follows live bytes.
+      var UI_POST_DOWNLOAD_MAX_STEP_PER_FRAME = 0.006;
 
       function mapUnityLoaderProgressToUi(unityProgress) {
         var p = Math.min(Math.max(unityProgress, 0), UNITY_DOWNLOAD_PROGRESS_MAX);
@@ -519,12 +506,6 @@
         framework: { loaded: 0, headerTotal: 0, done: false },
         wasm: { loaded: 0, headerTotal: 0, done: false }
       };
-      var UNITY_ASSET_FALLBACK_BYTES = {
-        loader: UNITY_LOADER_MB * 1024 * 1024,
-        data: UNITY_DATA_MB * 1024 * 1024,
-        framework: UNITY_FRAMEWORK_MB * 1024 * 1024,
-        wasm: UNITY_WASM_MB * 1024 * 1024
-      };
       var lastNetworkBytesSum = 0;
       var lastNetworkSpeedTime = null;
       var _postDownloadPhase = false;
@@ -532,43 +513,6 @@
       var _loaderHidden = false;
       var _loaderHideScheduled = false;
       var _loaderForceHideTimer = null;
-      var _loaderProgressStartMs = null;
-      var _loaderTimeCapTickId = null;
-
-      function stopLoaderTimeCapTick() {
-        if (_loaderTimeCapTickId != null) {
-          cancelAnimationFrame(_loaderTimeCapTickId);
-          _loaderTimeCapTickId = null;
-        }
-      }
-
-      function startLoaderTimeCapTick() {
-        if (_loaderTimeCapTickId != null) return;
-        function tick() {
-          if (_loaderHidden) {
-            stopLoaderTimeCapTick();
-            return;
-          }
-          applyLoaderUiProgress(lastUnityLoaderProgressForUi);
-          _loaderTimeCapTickId = requestAnimationFrame(tick);
-        }
-        _loaderTimeCapTickId = requestAnimationFrame(tick);
-      }
-
-      function getLoaderProgressTimeCap() {
-        if (_loaderProgressStartMs == null) _loaderProgressStartMs = performance.now();
-        var elapsed = performance.now() - _loaderProgressStartMs;
-        if (elapsed <= LOADER_MIN_DOWNLOAD_PHASE_MS) {
-          return (elapsed / LOADER_MIN_DOWNLOAD_PHASE_MS) * UI_PROGRESS_DURING_DOWNLOAD_MAX;
-        }
-        var postElapsed = elapsed - LOADER_MIN_DOWNLOAD_PHASE_MS;
-        var postRatio = Math.min(1, postElapsed / LOADER_MIN_POST_DOWNLOAD_PHASE_MS);
-        return UI_PROGRESS_DURING_DOWNLOAD_MAX + postRatio * (1 - UI_PROGRESS_DURING_DOWNLOAD_MAX);
-      }
-
-      function capLoaderUiTarget(rawTarget) {
-        return Math.min(rawTarget, getLoaderProgressTimeCap());
-      }
 
       function unityMainAssetKeyFromPathname(pathname) {
         if (!pathname) return null;
@@ -588,20 +532,15 @@
         }
       }
 
-      function plannedAssetTotalBytes(key, st) {
-        var fallback = UNITY_ASSET_FALLBACK_BYTES[key] || 0;
-        var planned = Math.max(st.headerTotal, fallback);
-        if (st.loaded > planned) planned = st.loaded;
-        return planned;
+      function assetDownloadRatio(st) {
+        if (st.done) return 1;
+        if (st.headerTotal > 0) return Math.min(1, st.loaded / st.headerTotal);
+        return 0;
       }
 
       function allBuildDownloadsComplete() {
         for (var i = 0; i < BUILD_ASSET_KEYS.length; i++) {
-          var k = BUILD_ASSET_KEYS[i];
-          var st = unityAssetByteState[k];
-          if (!st.done) return false;
-          var expected = plannedAssetTotalBytes(k, st);
-          if (expected > 0 && st.loaded < expected * 0.995) return false;
+          if (!unityAssetByteState[BUILD_ASSET_KEYS[i]].done) return false;
         }
         return true;
       }
@@ -609,16 +548,15 @@
       function getUnityNetworkLoadedRatio() {
         if (!buildLoadTrackingStarted) return null;
 
-        var loaded = 0;
-        var total = 0;
+        var sum = 0;
+        var started = false;
         for (var i = 0; i < BUILD_ASSET_KEYS.length; i++) {
-          var k = BUILD_ASSET_KEYS[i];
-          var st = unityAssetByteState[k];
-          loaded += st.loaded;
-          total += plannedAssetTotalBytes(k, st);
+          var st = unityAssetByteState[BUILD_ASSET_KEYS[i]];
+          if (st.loaded > 0 || st.done || st.headerTotal > 0) started = true;
+          sum += assetDownloadRatio(st);
         }
-        if (total <= 0) return null;
-        return Math.min(1, loaded / total);
+        if (!started) return null;
+        return sum / BUILD_ASSET_KEYS.length;
       }
 
       function syncUnityAssetsFromResourceTiming() {
@@ -638,15 +576,11 @@
           }
           if (entry.responseEnd > 0) {
             var size = wireSize || entry.encodedBodySize || 0;
-            if (size > 0) {
-              var planned = plannedAssetTotalBytes(key, st);
-              if (planned > 0 && size > planned * 1.25) {
-                size = st.loaded;
-              }
-              st.loaded = Math.max(st.loaded, size);
-            }
-            var expected = plannedAssetTotalBytes(key, st);
-            if (expected > 0 && st.loaded >= expected * 0.995) {
+            if (size > 0) st.loaded = Math.max(st.loaded, size);
+            if (st.headerTotal > 0 && st.loaded >= st.headerTotal) {
+              st.done = true;
+            } else if (st.headerTotal <= 0 && size > 0) {
+              st.headerTotal = size;
               st.done = true;
             }
             touched = true;
@@ -741,17 +675,60 @@
 
         var origFetch = window.fetch;
         window.fetch = function (input, init) {
+          var method = "GET";
+          if (init && init.method) method = init.method;
+          else if (input && typeof input.method === "string") method = input.method;
+
           return origFetch.apply(this, arguments).then(function (res) {
             var urlStr = "";
             if (typeof input === "string") urlStr = input;
             else if (input && typeof input.url === "string") urlStr = input.url;
             if (!urlStr || !res || !res.ok) return res;
+            if (String(method).toUpperCase() === "HEAD") return res;
 
             var assetKey = unityMainAssetKeyFromUrl(urlStr);
             if (!assetKey) return res;
             buildLoadTrackingStarted = true;
             return wrapUnityMainAssetResponseBody(assetKey, res);
           });
+        };
+      }
+
+      function installUnityMainAssetXhrTracker() {
+        if (window.__unityMainAssetXhrTrackerInstalled) return;
+        window.__unityMainAssetXhrTrackerInstalled = true;
+
+        var origOpen = XMLHttpRequest.prototype.open;
+        var origSend = XMLHttpRequest.prototype.send;
+
+        XMLHttpRequest.prototype.open = function (method, url) {
+          this.__gvAssetMethod = method;
+          this.__gvAssetUrl = url;
+          return origOpen.apply(this, arguments);
+        };
+
+        XMLHttpRequest.prototype.send = function () {
+          var xhr = this;
+          var key = unityMainAssetKeyFromUrl(xhr.__gvAssetUrl);
+          if (key && String(xhr.__gvAssetMethod || "GET").toUpperCase() !== "HEAD") {
+            buildLoadTrackingStarted = true;
+            var st = unityAssetByteState[key];
+            xhr.addEventListener("progress", function (e) {
+              if (e.lengthComputable && e.total > 0) {
+                st.headerTotal = Math.max(st.headerTotal, e.total);
+                st.loaded = e.loaded;
+              } else if (e.loaded > 0) {
+                st.loaded = Math.max(st.loaded, e.loaded);
+              }
+              notifyUnityMainAssetByteProgress();
+            });
+            xhr.addEventListener("load", function () {
+              st.done = true;
+              if (st.headerTotal > 0) st.loaded = Math.max(st.loaded, st.headerTotal);
+              notifyUnityMainAssetByteProgress();
+            });
+          }
+          return origSend.apply(this, arguments);
         };
       }
 
@@ -822,11 +799,8 @@
           speed = Math.min(speed, _postDownloadPhase ? 0.12 : 0.065);
 
           var step = difference * speed;
-          if (step > 0) {
-            var maxStep = _postDownloadPhase
-              ? UI_POST_DOWNLOAD_MAX_STEP_PER_FRAME
-              : UI_PROGRESS_MAX_STEP_PER_FRAME;
-            if (step > maxStep) step = maxStep;
+          if (step > 0 && _postDownloadPhase) {
+            if (step > UI_POST_DOWNLOAD_MAX_STEP_PER_FRAME) step = UI_POST_DOWNLOAD_MAX_STEP_PER_FRAME;
           }
           this.currentValue += step;
 
@@ -884,14 +858,18 @@
       var lastNetworkUiPushMs = 0;
 
       function buildDownloadsReadyForInit() {
-        if (!allBuildDownloadsComplete()) return false;
-        var netRatio = getUnityNetworkLoadedRatio();
-        if (netRatio != null && netRatio < UI_NETWORK_COMPLETE_RATIO) return false;
-        return true;
+        return allBuildDownloadsComplete();
       }
 
       function combinedLoaderUiTarget(unityProgress) {
-        if (_postDownloadPhase) return 1.0;
+        if (_postDownloadPhase) {
+          if (_unityInstanceReady) return 1.0;
+          var p = Math.min(Math.max(unityProgress, 0), 1);
+          if (p <= UNITY_DOWNLOAD_PROGRESS_MAX) return UI_PROGRESS_DURING_DOWNLOAD_MAX;
+          return UI_PROGRESS_DURING_DOWNLOAD_MAX +
+            ((p - UNITY_DOWNLOAD_PROGRESS_MAX) / (1 - UNITY_DOWNLOAD_PROGRESS_MAX)) *
+            (1 - UI_PROGRESS_DURING_DOWNLOAD_MAX);
+        }
 
         var netRatio = getUnityNetworkLoadedRatio();
         if (netRatio != null) {
@@ -921,10 +899,9 @@
         });
       }
 
-      function canStartPostDownloadRamp(unityProgress) {
+      function canStartPostDownloadRamp() {
         if (buildDownloadsReadyForInit()) return true;
         if (_unityInstanceReady) return true;
-        if (unityProgress >= UNITY_DOWNLOAD_PROGRESS_MAX) return true;
         return false;
       }
 
@@ -932,13 +909,18 @@
         if (_loaderHidden) return;
 
         if (!_postDownloadPhase) {
-          if (!canStartPostDownloadRamp(lastUnityLoaderProgressForUi)) return;
+          if (!canStartPostDownloadRamp()) return;
           _postDownloadPhase = true;
           currentDownloadSpeedBps = 0;
           if (progressSpeedEl) progressSpeedEl.style.display = "none";
         }
 
-        smoothProgress.setTarget(capLoaderUiTarget(1.0));
+        var target = _unityInstanceReady
+          ? 1.0
+          : combinedLoaderUiTarget(lastUnityLoaderProgressForUi);
+        if (target < smoothProgress.targetValue) target = smoothProgress.targetValue;
+        if (target < smoothProgress.currentValue) target = smoothProgress.currentValue;
+        smoothProgress.setTarget(target);
         pollLoaderHideWhenReady();
       }
 
@@ -946,13 +928,13 @@
         if (_loaderHidden) return;
 
         if (!_postDownloadPhase) {
-          if (canStartPostDownloadRamp(unityProgress)) {
+          if (canStartPostDownloadRamp()) {
             ensurePostDownloadRamp();
             return;
           }
-          var target = capLoaderUiTarget(combinedLoaderUiTarget(unityProgress));
-          if (target < smoothProgress.targetValue) target = smoothProgress.targetValue;
-          smoothProgress.setTarget(target);
+          var target = combinedLoaderUiTarget(unityProgress);
+          if (target < smoothProgress.currentValue) target = smoothProgress.currentValue;
+          smoothProgress.setSynced(target);
           return;
         }
 
@@ -964,6 +946,12 @@
           smoothProgress.targetValue >= 1.0;
       }
 
+      function scheduleLoaderHide() {
+        if (_loaderHidden || _loaderHideScheduled) return;
+        _loaderHideScheduled = true;
+        setTimeout(hideUnityLoader, LOADER_HOLD_AT_100_MS);
+      }
+
       function pollLoaderHideWhenReady() {
         if (_loaderHidden || _loaderHideScheduled) return;
         if (!_postDownloadPhase || !_unityInstanceReady) return;
@@ -971,8 +959,7 @@
           requestAnimationFrame(pollLoaderHideWhenReady);
           return;
         }
-        _loaderHideScheduled = true;
-        setTimeout(hideUnityLoader, LOADER_HOLD_AT_100_MS);
+        scheduleLoaderHide();
       }
 
       function pushLoaderProgressFromNetworkIfNeeded() {
@@ -1032,6 +1019,7 @@
       };
 
       installUnityMainAssetFetchTracker();
+      installUnityMainAssetXhrTracker();
       prefetchBuildAssetSizes();
 
       var meta = document.createElement('meta');
@@ -1099,9 +1087,7 @@
       canvas.classList.add("unity-canvas-loading");
       canvas.style.visibility = "hidden";
       canvas.style.opacity = "0";
-      _loaderProgressStartMs = performance.now();
       smoothProgress.setImmediate(0);
-      startLoaderTimeCapTick();
 
       _loaderForceHideTimer = setTimeout(function () {
         if (!_loaderHidden) hideUnityLoader();
@@ -1349,7 +1335,6 @@
         if (_loaderHidden || _maintenanceActive) return;
         _loaderHidden = true;
         _loaderHideScheduled = true;
-        stopLoaderTimeCapTick();
         if (_loaderForceHideTimer != null) {
           clearTimeout(_loaderForceHideTimer);
           _loaderForceHideTimer = null;
@@ -1554,17 +1539,6 @@
           createUnityInstance(canvas, config, function (progress) {
             if (_maintenanceActive) return;
             lastUnityLoaderProgressForUi = progress;
-            var now = performance.now() / 1000;
-            if (getUnityNetworkLoadedRatio() == null && lastProgressTime != null && progress > lastProgressValue) {
-              var dt = now - lastProgressTime;
-              if (dt > 0.2) {
-                var loadedDelta = (progress - lastProgressValue) * totalDownloadBytes;
-                currentDownloadSpeedBps = loadedDelta / dt;
-              }
-            }
-            lastProgressTime = now;
-            lastProgressValue = progress;
-
             applyLoaderUiProgress(progress);
           }).then(function (unityInstance) {
             if (_maintenanceActive) return;
