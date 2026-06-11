@@ -491,7 +491,8 @@
       // Real bytes → 0–90% UI; after all build files finish → smooth 90–100%; hide loader then show canvas.
       var UI_PROGRESS_DURING_DOWNLOAD_MAX = 0.9;
       var LOADER_HOLD_AT_100_MS = 600;
-      // Smooth 90–100% init phase; download phase follows live bytes.
+      // Smooth bar motion during download and init phases.
+      var UI_DOWNLOAD_MAX_STEP_PER_FRAME = 0.01;
       var UI_POST_DOWNLOAD_MAX_STEP_PER_FRAME = 0.006;
 
       function mapUnityLoaderProgressToUi(unityProgress) {
@@ -532,9 +533,9 @@
         }
       }
 
-      function assetDownloadRatio(st) {
-        if (st.done) return 1;
-        if (st.headerTotal > 0) return Math.min(1, st.loaded / st.headerTotal);
+      function assetPlannedBytes(st) {
+        if (st.headerTotal > 0) return st.headerTotal;
+        if (st.done && st.loaded > 0) return st.loaded;
         return 0;
       }
 
@@ -548,15 +549,17 @@
       function getUnityNetworkLoadedRatio() {
         if (!buildLoadTrackingStarted) return null;
 
-        var sum = 0;
+        var loaded = 0;
+        var total = 0;
         var started = false;
         for (var i = 0; i < BUILD_ASSET_KEYS.length; i++) {
           var st = unityAssetByteState[BUILD_ASSET_KEYS[i]];
           if (st.loaded > 0 || st.done || st.headerTotal > 0) started = true;
-          sum += assetDownloadRatio(st);
+          loaded += st.loaded;
+          total += assetPlannedBytes(st);
         }
-        if (!started) return null;
-        return sum / BUILD_ASSET_KEYS.length;
+        if (!started || total <= 0) return null;
+        return Math.min(1, loaded / total);
       }
 
       function syncUnityAssetsFromResourceTiming() {
@@ -631,10 +634,12 @@
       }
 
       function wrapUnityMainAssetResponseBody(assetKey, res) {
-        if (!res || !res.body || typeof res.body.getReader !== "function") return res;
         var st = unityAssetByteState[assetKey];
         var cl = parseInt(res.headers.get("Content-Length") || "0", 10) || 0;
-        if (cl > 0) st.headerTotal = cl;
+        if (cl > 0) st.headerTotal = Math.max(st.headerTotal, cl);
+        notifyUnityMainAssetByteProgress();
+
+        if (!res || !res.body || typeof res.body.getReader !== "function") return res;
 
         var reader = res.body.getReader();
         var monitored = new ReadableStream({
@@ -713,10 +718,13 @@
           if (key && String(xhr.__gvAssetMethod || "GET").toUpperCase() !== "HEAD") {
             buildLoadTrackingStarted = true;
             var st = unityAssetByteState[key];
+            xhr.addEventListener("loadstart", function () {
+              notifyUnityMainAssetByteProgress();
+            });
             xhr.addEventListener("progress", function (e) {
               if (e.lengthComputable && e.total > 0) {
                 st.headerTotal = Math.max(st.headerTotal, e.total);
-                st.loaded = e.loaded;
+                st.loaded = Math.max(st.loaded, e.loaded);
               } else if (e.loaded > 0) {
                 st.loaded = Math.max(st.loaded, e.loaded);
               }
@@ -799,8 +807,11 @@
           speed = Math.min(speed, _postDownloadPhase ? 0.12 : 0.065);
 
           var step = difference * speed;
-          if (step > 0 && _postDownloadPhase) {
-            if (step > UI_POST_DOWNLOAD_MAX_STEP_PER_FRAME) step = UI_POST_DOWNLOAD_MAX_STEP_PER_FRAME;
+          if (step > 0) {
+            var maxStep = _postDownloadPhase
+              ? UI_POST_DOWNLOAD_MAX_STEP_PER_FRAME
+              : UI_DOWNLOAD_MAX_STEP_PER_FRAME;
+            if (step > maxStep) step = maxStep;
           }
           this.currentValue += step;
 
@@ -872,10 +883,13 @@
         }
 
         var netRatio = getUnityNetworkLoadedRatio();
+        var unityUi = mapUnityLoaderProgressToUi(unityProgress);
         if (netRatio != null) {
-          return Math.min(netRatio * UI_PROGRESS_DURING_DOWNLOAD_MAX, UI_PROGRESS_DURING_DOWNLOAD_MAX);
+          var byteUi = netRatio * UI_PROGRESS_DURING_DOWNLOAD_MAX;
+          // Use whichever is further so the bar keeps moving during large file downloads.
+          return Math.min(Math.max(byteUi, unityUi), UI_PROGRESS_DURING_DOWNLOAD_MAX);
         }
-        return Math.min(mapUnityLoaderProgressToUi(unityProgress), UI_PROGRESS_DURING_DOWNLOAD_MAX);
+        return Math.min(unityUi, UI_PROGRESS_DURING_DOWNLOAD_MAX);
       }
 
       function prefetchBuildAssetSizes() {
@@ -934,7 +948,7 @@
           }
           var target = combinedLoaderUiTarget(unityProgress);
           if (target < smoothProgress.currentValue) target = smoothProgress.currentValue;
-          smoothProgress.setSynced(target);
+          smoothProgress.setTarget(target);
           return;
         }
 
