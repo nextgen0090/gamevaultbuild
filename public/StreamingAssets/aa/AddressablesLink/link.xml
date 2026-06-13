@@ -94,6 +94,7 @@
     <type fullname="CleopatraUIManager" preserve="all" />
     <type fullname="CoinManager" preserve="all" />
     <type fullname="CoinUpdateManager" preserve="all" />
+    <type fullname="CoinUpdateWatcher" preserve="all" />
     <type fullname="ComeOnCash2AutoSpinController" preserve="all" />
     <type fullname="ComeOnCash2BetController" preserve="all" />
     <type fullname="ComeOnCash2FreeGameTransitionController" preserve="all" />
