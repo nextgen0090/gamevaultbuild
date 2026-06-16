@@ -142,20 +142,8 @@
     <type fullname="CustomPasswordChar" preserve="all" />
     <type fullname="CylindricalUIWarpSwipe" preserve="all" />
     <type fullname="DayOfDeadAnimationController" preserve="all" />
-    <type fullname="DayOfDeadAutoSpinController" preserve="all" />
-    <type fullname="DayOfDeadBetController" preserve="all" />
-    <type fullname="DayOfDeadFreeGameTransitionController" preserve="all" />
-    <type fullname="DayOfDeadFreeSpinController" preserve="all" />
-    <type fullname="DayOfDeadFreeSpinTopBar" preserve="all" />
     <type fullname="DayOfDeadGameSettings" preserve="all" />
-    <type fullname="DayOfDeadPaylineController" preserve="all" />
-    <type fullname="DayOfDeadReelScript" preserve="all" />
-    <type fullname="DayOfDeadRulesPopupController" preserve="all" />
-    <type fullname="DayOfDeadSlotMachine" preserve="all" />
     <type fullname="DayOfDeadSlotScript" preserve="all" />
-    <type fullname="DayOfDeadSoundManager" preserve="all" />
-    <type fullname="DayOfDeadUIButtonController" preserve="all" />
-    <type fullname="DayOfDeadUIManager" preserve="all" />
     <type fullname="DisableMe" preserve="all" />
     <type fullname="DoubleJackpotBullseyeAutoSpinController" preserve="all" />
     <type fullname="DoubleJackpotBullseyeBetController" preserve="all" />
@@ -761,7 +749,6 @@
     <type fullname="DayOfDeadSlotSettings" preserve="nothing" serialized="true" />
     <type fullname="DayOfDeadSoundItem" preserve="nothing" serialized="true" />
     <type fullname="DayOfDeadSpinSettings" preserve="nothing" serialized="true" />
-    <type fullname="DayOfDeadPaylineData" preserve="nothing" serialized="true" />
     <type fullname="SaharaRichesSlotResource" preserve="nothing" serialized="true" />
     <type fullname="SaharaRichesSlotSettings" preserve="nothing" serialized="true" />
     <type fullname="SaharaRichesSoundItem" preserve="nothing" serialized="true" />
