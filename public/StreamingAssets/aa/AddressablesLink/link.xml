@@ -39,6 +39,18 @@
     <type fullname="BonusFishController" preserve="all" />
     <type fullname="BotController" preserve="all" />
     <type fullname="BotManager" preserve="all" />
+    <type fullname="BuffaloXtraReelPowerAutoSpinController" preserve="all" />
+    <type fullname="BuffaloXtraReelPowerBetController" preserve="all" />
+    <type fullname="BuffaloXtraReelPowerFreeGameTransitionController" preserve="all" />
+    <type fullname="BuffaloXtraReelPowerFreeSpinController" preserve="all" />
+    <type fullname="BuffaloXtraReelPowerGameSettings" preserve="all" />
+    <type fullname="BuffaloXtraReelPowerPaylineController" preserve="all" />
+    <type fullname="BuffaloXtraReelPowerReelScript" preserve="all" />
+    <type fullname="BuffaloXtraReelPowerRulesPopupController" preserve="all" />
+    <type fullname="BuffaloXtraReelPowerSlotMachine" preserve="all" />
+    <type fullname="BuffaloXtraReelPowerSlotScript" preserve="all" />
+    <type fullname="BuffaloXtraReelPowerSoundManager" preserve="all" />
+    <type fullname="BuffaloXtraReelPowerUIManager" preserve="all" />
     <type fullname="Bullet" preserve="all" />
     <type fullname="BulletPool" preserve="all" />
     <type fullname="ButtonWithAnimation" preserve="all" />
@@ -142,8 +154,20 @@
     <type fullname="CustomPasswordChar" preserve="all" />
     <type fullname="CylindricalUIWarpSwipe" preserve="all" />
     <type fullname="DayOfDeadAnimationController" preserve="all" />
+    <type fullname="DayOfDeadAutoSpinController" preserve="all" />
+    <type fullname="DayOfDeadBetController" preserve="all" />
+    <type fullname="DayOfDeadFreeGameTransitionController" preserve="all" />
+    <type fullname="DayOfDeadFreeSpinController" preserve="all" />
+    <type fullname="DayOfDeadFreeSpinTopBar" preserve="all" />
     <type fullname="DayOfDeadGameSettings" preserve="all" />
+    <type fullname="DayOfDeadPaylineController" preserve="all" />
+    <type fullname="DayOfDeadReelScript" preserve="all" />
+    <type fullname="DayOfDeadRulesPopupController" preserve="all" />
+    <type fullname="DayOfDeadSlotMachine" preserve="all" />
     <type fullname="DayOfDeadSlotScript" preserve="all" />
+    <type fullname="DayOfDeadSoundManager" preserve="all" />
+    <type fullname="DayOfDeadUIButtonController" preserve="all" />
+    <type fullname="DayOfDeadUIManager" preserve="all" />
     <type fullname="DisableMe" preserve="all" />
     <type fullname="DoubleJackpotBullseyeAutoSpinController" preserve="all" />
     <type fullname="DoubleJackpotBullseyeBetController" preserve="all" />
@@ -196,6 +220,7 @@
     <type fullname="FPSCounter" preserve="all" />
     <type fullname="FruitMaryAutoSpinController" preserve="all" />
     <type fullname="FruitMaryBetController" preserve="all" />
+    <type fullname="FruitMaryFreeSpinController" preserve="all" />
     <type fullname="FruitMaryFruiMaryGameSlotScript" preserve="all" />
     <type fullname="FruitMaryFruitMaryGameBoxGame" preserve="all" />
     <type fullname="FruitMaryFruitMaryGameManager" preserve="all" />
@@ -354,6 +379,18 @@
     <type fullname="IrishPotLuckUIManager" preserve="all" />
     <type fullname="KenoSoundManager" preserve="all" />
     <type fullname="LeaderboardPanelManager" preserve="all" />
+    <type fullname="LifeOfLuxuryAutoSpinController" preserve="all" />
+    <type fullname="LifeOfLuxuryBetController" preserve="all" />
+    <type fullname="LifeOfLuxuryFreeGameTransitionController" preserve="all" />
+    <type fullname="LifeOfLuxuryFreeSpinController" preserve="all" />
+    <type fullname="LifeOfLuxuryGameSettings" preserve="all" />
+    <type fullname="LifeOfLuxuryPaylineController" preserve="all" />
+    <type fullname="LifeOfLuxuryReelScript" preserve="all" />
+    <type fullname="LifeOfLuxuryRulesPopupController" preserve="all" />
+    <type fullname="LifeOfLuxurySlotMachine" preserve="all" />
+    <type fullname="LifeOfLuxurySlotScript" preserve="all" />
+    <type fullname="LifeOfLuxurySoundManager" preserve="all" />
+    <type fullname="LifeOfLuxuryUIManager" preserve="all" />
     <type fullname="MainMenu.AvatarChangeController" preserve="all" />
     <type fullname="MainMenu.GamaCatagoryPanalControllor" preserve="all" />
     <type fullname="MainMenu.GameCardControllor" preserve="all" />
@@ -741,6 +778,11 @@
     <type fullname="ImperialDiamondSoundItem" preserve="nothing" serialized="true" />
     <type fullname="ImperialDiamondSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="ImperialDiamondPaylineData" preserve="nothing" serialized="true" />
+    <type fullname="BuffaloXtraReelPowerSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="BuffaloXtraReelPowerSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="BuffaloXtraReelPowerSoundItem" preserve="nothing" serialized="true" />
+    <type fullname="BuffaloXtraReelPowerSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="BuffaloXtraReelPowerSpinResult" preserve="nothing" serialized="true" />
     <type fullname="MonkeyMadnessGameSettings/SoundItem" preserve="nothing" serialized="true" />
     <type fullname="MonkeyMadnessSlotResource" preserve="nothing" serialized="true" />
     <type fullname="MonkeyMadnessSpinSettings" preserve="nothing" serialized="true" />
@@ -749,6 +791,7 @@
     <type fullname="DayOfDeadSlotSettings" preserve="nothing" serialized="true" />
     <type fullname="DayOfDeadSoundItem" preserve="nothing" serialized="true" />
     <type fullname="DayOfDeadSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="DayOfDeadPaylineData" preserve="nothing" serialized="true" />
     <type fullname="SaharaRichesSlotResource" preserve="nothing" serialized="true" />
     <type fullname="SaharaRichesSlotSettings" preserve="nothing" serialized="true" />
     <type fullname="SaharaRichesSoundItem" preserve="nothing" serialized="true" />
@@ -776,6 +819,11 @@
     <type fullname="ComeOnCashSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="ComeOnCashPaylineData" preserve="nothing" serialized="true" />
     <type fullname="StickyPiggyPaylineData" preserve="nothing" serialized="true" />
+    <type fullname="LifeOfLuxurySlotResource" preserve="nothing" serialized="true" />
+    <type fullname="LifeOfLuxurySlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="LifeOfLuxurySoundItem" preserve="nothing" serialized="true" />
+    <type fullname="LifeOfLuxurySpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="LifeOfLuxuryPaylineData" preserve="nothing" serialized="true" />
     <type fullname="GoldRushGusSlotResource" preserve="nothing" serialized="true" />
     <type fullname="GoldRushGusSlotSettings" preserve="nothing" serialized="true" />
     <type fullname="GoldRushGusSoundItem" preserve="nothing" serialized="true" />
@@ -1014,6 +1062,7 @@
     <type fullname="UnityEngine.UI.RectMask2D" preserve="all" />
     <type fullname="UnityEngine.UI.Scrollbar" preserve="all" />
     <type fullname="UnityEngine.UI.ScrollRect" preserve="all" />
+    <type fullname="UnityEngine.UI.Shadow" preserve="all" />
     <type fullname="UnityEngine.UI.Slider" preserve="all" />
     <type fullname="UnityEngine.UI.Text" preserve="all" />
     <type fullname="UnityEngine.UI.Toggle" preserve="all" />
