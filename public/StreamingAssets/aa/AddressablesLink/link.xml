@@ -391,6 +391,16 @@
     <type fullname="LifeOfLuxurySlotScript" preserve="all" />
     <type fullname="LifeOfLuxurySoundManager" preserve="all" />
     <type fullname="LifeOfLuxuryUIManager" preserve="all" />
+    <type fullname="LuckySevenAutoSpinController" preserve="all" />
+    <type fullname="LuckySevenBetController" preserve="all" />
+    <type fullname="LuckySevenGameSettings" preserve="all" />
+    <type fullname="LuckySevenPaylineController" preserve="all" />
+    <type fullname="LuckySevenReelScript" preserve="all" />
+    <type fullname="LuckySevenRulesPopupController" preserve="all" />
+    <type fullname="LuckySevenSlotMachine" preserve="all" />
+    <type fullname="LuckySevenSlotScript" preserve="all" />
+    <type fullname="LuckySevenSoundManager" preserve="all" />
+    <type fullname="LuckySevenUIManager" preserve="all" />
     <type fullname="MainMenu.AvatarChangeController" preserve="all" />
     <type fullname="MainMenu.GamaCatagoryPanalControllor" preserve="all" />
     <type fullname="MainMenu.GameCardControllor" preserve="all" />
@@ -664,6 +674,16 @@
     <type fullname="WheelOfFortuneSpinButton" preserve="all" />
     <type fullname="WheelOfFortuneUIButtonController" preserve="all" />
     <type fullname="WheelOfFortuneUIManager" preserve="all" />
+    <type fullname="WildBuffaloAutoSpinController" preserve="all" />
+    <type fullname="WildBuffaloBetController" preserve="all" />
+    <type fullname="WildBuffaloGameSettings" preserve="all" />
+    <type fullname="WildBuffaloPaylineController" preserve="all" />
+    <type fullname="WildBuffaloReelScript" preserve="all" />
+    <type fullname="WildBuffaloRulesPopupController" preserve="all" />
+    <type fullname="WildBuffaloSlotMachine" preserve="all" />
+    <type fullname="WildBuffaloSlotScript" preserve="all" />
+    <type fullname="WildBuffaloSoundManager" preserve="all" />
+    <type fullname="WildBuffaloUIManager" preserve="all" />
     <type fullname="WildXReelAutoSpinController" preserve="all" />
     <type fullname="WildXReelBetController" preserve="all" />
     <type fullname="WildXReelGameSettings" preserve="all" />
@@ -687,6 +707,16 @@
     <type fullname="WildXTrioUIManager" preserve="all" />
     <type fullname="WipeAnimation" preserve="all" />
     <type fullname="WipeAnimation_OceanKing" preserve="all" />
+    <type fullname="WolfMoonLinkAutoSpinController" preserve="all" />
+    <type fullname="WolfMoonLinkBetController" preserve="all" />
+    <type fullname="WolfMoonLinkGameSettings" preserve="all" />
+    <type fullname="WolfMoonLinkPaylineController" preserve="all" />
+    <type fullname="WolfMoonLinkReelScript" preserve="all" />
+    <type fullname="WolfMoonLinkRulesPopupController" preserve="all" />
+    <type fullname="WolfMoonLinkSlotMachine" preserve="all" />
+    <type fullname="WolfMoonLinkSlotScript" preserve="all" />
+    <type fullname="WolfMoonLinkSoundManager" preserve="all" />
+    <type fullname="WolfMoonLinkUIManager" preserve="all" />
     <type fullname="WorldSpaceUIButton" preserve="all" />
     <type fullname="ZombieParadiseAutoSpinController" preserve="all" />
     <type fullname="ZombieParadiseBetController" preserve="all" />
@@ -739,6 +769,11 @@
     <type fullname="PiratesOfTheCaribbeanSoundItem" preserve="nothing" serialized="true" />
     <type fullname="PiratesOfTheCaribbeanSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="PiratesOfTheCaribbeanPaylineData" preserve="nothing" serialized="true" />
+    <type fullname="LuckySevenSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="LuckySevenSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="LuckySevenSoundItem" preserve="nothing" serialized="true" />
+    <type fullname="LuckySevenSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="LuckySevenPaylineData" preserve="nothing" serialized="true" />
     <type fullname="RedHotTrippleSlotResource" preserve="nothing" serialized="true" />
     <type fullname="RedHotTrippleSoundItem" preserve="nothing" serialized="true" />
     <type fullname="RedHotTrippleSpinSettings" preserve="nothing" serialized="true" />
@@ -783,6 +818,11 @@
     <type fullname="BuffaloXtraReelPowerSoundItem" preserve="nothing" serialized="true" />
     <type fullname="BuffaloXtraReelPowerSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="BuffaloXtraReelPowerSpinResult" preserve="nothing" serialized="true" />
+    <type fullname="WildBuffaloSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="WildBuffaloSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="WildBuffaloSoundItem" preserve="nothing" serialized="true" />
+    <type fullname="WildBuffaloSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="WildBuffaloPaylineData" preserve="nothing" serialized="true" />
     <type fullname="MonkeyMadnessGameSettings/SoundItem" preserve="nothing" serialized="true" />
     <type fullname="MonkeyMadnessSlotResource" preserve="nothing" serialized="true" />
     <type fullname="MonkeyMadnessSpinSettings" preserve="nothing" serialized="true" />
@@ -876,6 +916,11 @@
     <type fullname="FruitParadiseSoundItem" preserve="nothing" serialized="true" />
     <type fullname="FruitParadiseSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="FruitParadisePaylineData" preserve="nothing" serialized="true" />
+    <type fullname="WolfMoonLinkSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="WolfMoonLinkSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="WolfMoonLinkSoundItem" preserve="nothing" serialized="true" />
+    <type fullname="WolfMoonLinkSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="WolfMoonLinkPaylineData" preserve="nothing" serialized="true" />
     <type fullname="ComeOnCash2SlotResource" preserve="nothing" serialized="true" />
     <type fullname="ComeOnCash2SoundItem" preserve="nothing" serialized="true" />
     <type fullname="ComeOnCash2SpinSettings" preserve="nothing" serialized="true" />
