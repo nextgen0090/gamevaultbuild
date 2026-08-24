@@ -676,6 +676,9 @@
     <type fullname="WheelOfFortuneUIManager" preserve="all" />
     <type fullname="WildBuffaloAutoSpinController" preserve="all" />
     <type fullname="WildBuffaloBetController" preserve="all" />
+    <type fullname="WildBuffaloBonusWheelFeature" preserve="all" />
+    <type fullname="WildBuffaloFreeGameTransitionController" preserve="all" />
+    <type fullname="WildBuffaloFreeSpinController" preserve="all" />
     <type fullname="WildBuffaloGameSettings" preserve="all" />
     <type fullname="WildBuffaloPaylineController" preserve="all" />
     <type fullname="WildBuffaloReelScript" preserve="all" />
@@ -709,6 +712,11 @@
     <type fullname="WipeAnimation_OceanKing" preserve="all" />
     <type fullname="WolfMoonLinkAutoSpinController" preserve="all" />
     <type fullname="WolfMoonLinkBetController" preserve="all" />
+    <type fullname="WolfMoonLinkBonusGameManager" preserve="all" />
+    <type fullname="WolfMoonLinkBonusGameSettings" preserve="all" />
+    <type fullname="WolfMoonLinkBonusReelScript" preserve="all" />
+    <type fullname="WolfMoonLinkBonusSlotMachine" preserve="all" />
+    <type fullname="WolfMoonLinkBonusSlotScript" preserve="all" />
     <type fullname="WolfMoonLinkGameSettings" preserve="all" />
     <type fullname="WolfMoonLinkPaylineController" preserve="all" />
     <type fullname="WolfMoonLinkReelScript" preserve="all" />
@@ -916,6 +924,8 @@
     <type fullname="FruitParadiseSoundItem" preserve="nothing" serialized="true" />
     <type fullname="FruitParadiseSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="FruitParadisePaylineData" preserve="nothing" serialized="true" />
+    <type fullname="WolfMoonLinkBonusSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="WolfMoonLinkBonusSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="WolfMoonLinkSlotResource" preserve="nothing" serialized="true" />
     <type fullname="WolfMoonLinkSlotSettings" preserve="nothing" serialized="true" />
     <type fullname="WolfMoonLinkSoundItem" preserve="nothing" serialized="true" />
