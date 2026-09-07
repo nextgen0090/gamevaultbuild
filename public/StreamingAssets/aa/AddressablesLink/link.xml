@@ -786,6 +786,7 @@
     <type fullname="RedHotTrippleSoundItem" preserve="nothing" serialized="true" />
     <type fullname="RedHotTrippleSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="RedHotTripplePaylineData" preserve="nothing" serialized="true" />
+    <type fullname="WolfMoonLinkBonusState" preserve="nothing" serialized="true" />
     <type fullname="VegasSevenResource" preserve="nothing" serialized="true" />
     <type fullname="VegasSevenSoundItem" preserve="nothing" serialized="true" />
     <type fullname="VegasSevenSpinSettings" preserve="nothing" serialized="true" />
@@ -924,6 +925,7 @@
     <type fullname="FruitParadiseSoundItem" preserve="nothing" serialized="true" />
     <type fullname="FruitParadiseSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="FruitParadisePaylineData" preserve="nothing" serialized="true" />
+    <type fullname="WolfMoonLinkBonusSlotResource" preserve="nothing" serialized="true" />
     <type fullname="WolfMoonLinkBonusSlotSettings" preserve="nothing" serialized="true" />
     <type fullname="WolfMoonLinkBonusSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="WolfMoonLinkSlotResource" preserve="nothing" serialized="true" />
