@@ -544,6 +544,21 @@
     <type fullname="SaharaRichesSoundManager" preserve="all" />
     <type fullname="SaharaRichesUIButtonController" preserve="all" />
     <type fullname="SaharaRichesUIManager" preserve="all" />
+    <type fullname="SecretsOfChristmasAutoSpinController" preserve="all" />
+    <type fullname="SecretsOfChristmasBetController" preserve="all" />
+    <type fullname="SecretsOfChristmasBonusGameController" preserve="all" />
+    <type fullname="SecretsOfChristmasFreeGameTransitionController" preserve="all" />
+    <type fullname="SecretsOfChristmasFreeSpinController" preserve="all" />
+    <type fullname="SecretsOfChristmasGameSettings" preserve="all" />
+    <type fullname="SecretsOfChristmasGiftObject" preserve="all" />
+    <type fullname="SecretsOfChristmasPaylineController" preserve="all" />
+    <type fullname="SecretsOfChristmasReelScript" preserve="all" />
+    <type fullname="SecretsOfChristmasRulesPopupController" preserve="all" />
+    <type fullname="SecretsOfChristmasSlotMachine" preserve="all" />
+    <type fullname="SecretsOfChristmasSlotScript" preserve="all" />
+    <type fullname="SecretsOfChristmasSoundManager" preserve="all" />
+    <type fullname="SecretsOfChristmasStartSceneAnimationController" preserve="all" />
+    <type fullname="SecretsOfChristmasUIManager" preserve="all" />
     <type fullname="SettingsPanelController" preserve="all" />
     <type fullname="SlotSpinService" preserve="all" />
     <type fullname="SpinResultController" preserve="all" />
@@ -852,6 +867,13 @@
     <type fullname="FruitMarySpinSettings" preserve="nothing" serialized="true" />
     <type fullname="FruitMaryGame" preserve="nothing" serialized="true" />
     <type fullname="FruitMaryPaylineData" preserve="nothing" serialized="true" />
+    <type fullname="SecretsOfChristmasSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="SecretsOfChristmasSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="SecretsOfChristmasSoundItem" preserve="nothing" serialized="true" />
+    <type fullname="SecretsOfChristmasSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="SecretsOfChristmasBonusReward" preserve="nothing" serialized="true" />
+    <type fullname="SecretsOfChristmasFreeSpinState" preserve="nothing" serialized="true" />
+    <type fullname="SecretsOfChristmasPaylineData" preserve="nothing" serialized="true" />
     <type fullname="WheelOfFortuneSlotResource" preserve="nothing" serialized="true" />
     <type fullname="WheelOfFortuneSoundItem" preserve="nothing" serialized="true" />
     <type fullname="WheelOfFortuneSpinSettings" preserve="nothing" serialized="true" />
