@@ -826,6 +826,9 @@
     <type fullname="RichLittlePiggiesSlotSettings" preserve="nothing" serialized="true" />
     <type fullname="RichLittlePiggiesSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="StickyPiggySlotResource" preserve="nothing" serialized="true" />
+    <type fullname="StickyPiggySlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="StickyPiggySoundItem" preserve="nothing" serialized="true" />
+    <type fullname="StickyPiggySpinSettings" preserve="nothing" serialized="true" />
     <type fullname="RichLittlePiggiesPaylineData" preserve="nothing" serialized="true" />
     <type fullname="TheGreenMachineDeluxeSlotResource" preserve="nothing" serialized="true" />
     <type fullname="TheGreenMachineDeluxeSoundItem" preserve="nothing" serialized="true" />
@@ -839,7 +842,6 @@
     <type fullname="BuffaloXtraReelPowerSoundItem" preserve="nothing" serialized="true" />
     <type fullname="BuffaloXtraReelPowerSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="BuffaloXtraReelPowerSpinResult" preserve="nothing" serialized="true" />
-    <type fullname="SecretsOfChristmasFreeSpinState" preserve="nothing" serialized="true" />
     <type fullname="WildBuffaloSlotResource" preserve="nothing" serialized="true" />
     <type fullname="WildBuffaloSlotSettings" preserve="nothing" serialized="true" />
     <type fullname="WildBuffaloSoundItem" preserve="nothing" serialized="true" />
@@ -870,6 +872,7 @@
     <type fullname="SecretsOfChristmasSoundItem" preserve="nothing" serialized="true" />
     <type fullname="SecretsOfChristmasSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="SecretsOfChristmasBonusReward" preserve="nothing" serialized="true" />
+    <type fullname="SecretsOfChristmasFreeSpinState" preserve="nothing" serialized="true" />
     <type fullname="SecretsOfChristmasPaylineData" preserve="nothing" serialized="true" />
     <type fullname="WheelOfFortuneSlotResource" preserve="nothing" serialized="true" />
     <type fullname="WheelOfFortuneSoundItem" preserve="nothing" serialized="true" />
@@ -886,9 +889,6 @@
     <type fullname="ComeOnCashSoundItem" preserve="nothing" serialized="true" />
     <type fullname="ComeOnCashSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="ComeOnCashPaylineData" preserve="nothing" serialized="true" />
-    <type fullname="StickyPiggySlotSettings" preserve="nothing" serialized="true" />
-    <type fullname="StickyPiggySoundItem" preserve="nothing" serialized="true" />
-    <type fullname="StickyPiggySpinSettings" preserve="nothing" serialized="true" />
     <type fullname="StickyPiggyPaylineData" preserve="nothing" serialized="true" />
     <type fullname="LifeOfLuxurySlotResource" preserve="nothing" serialized="true" />
     <type fullname="LifeOfLuxurySlotSettings" preserve="nothing" serialized="true" />
@@ -965,7 +965,6 @@
     <type fullname="FlameComboPaylineData" preserve="nothing" serialized="true" />
     <type fullname="GoldGobblersSlotResource" preserve="nothing" serialized="true" />
     <type fullname="GoldGobblersSlotSettings" preserve="nothing" serialized="true" />
-    <type fullname="GoldGobblersSoundItem" preserve="nothing" serialized="true" />
     <type fullname="GoldGobblersSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="GoldGobblersSpinResult" preserve="nothing" serialized="true" />
     <type fullname="CartoonFX.CFXR_Effect/AnimatedLight" preserve="nothing" serialized="true" />
