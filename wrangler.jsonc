@@ -3,13 +3,21 @@
   "name": "gamevaultbuild",
   "main": "src/index.js",
   "compatibility_date": "2026-05-18",
+
   "observability": {
     "enabled": true
   },
+
   "assets": {
-    "directory": "./public"
+    "directory": "./public",
+    "not_found_handling": "single-page-application"
   },
+
   "compatibility_flags": [
     "nodejs_compat"
-  ]
+  ],
+
+  "vars": {
+    "ALLOWED_IPS": "137.59.226.231"
+  }
 }
