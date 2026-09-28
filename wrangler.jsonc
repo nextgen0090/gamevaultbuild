@@ -6,9 +6,19 @@
   "observability": {
     "enabled": true
   },
+  "build": {
+    "command": "node scripts/prepare-large-assets.mjs"
+  },
   "assets": {
     "directory": "./public"
   },
+  "r2_buckets": [
+    {
+      "binding": "GAME_ASSETS",
+      "bucket_name": "gamevault-unity-assets",
+      "remote": true
+    }
+  ],
   "compatibility_flags": [
     "nodejs_compat"
   ]
