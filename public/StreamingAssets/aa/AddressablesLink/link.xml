@@ -153,6 +153,7 @@
     <type fullname="CrazySevenUIManager" preserve="all" />
     <type fullname="CustomPasswordChar" preserve="all" />
     <type fullname="CylindricalUIWarpSwipe" preserve="all" />
+    <type fullname="DailyRewardContoller" preserve="all" />
     <type fullname="DayOfDeadAnimationController" preserve="all" />
     <type fullname="DayOfDeadAutoSpinController" preserve="all" />
     <type fullname="DayOfDeadBetController" preserve="all" />
@@ -184,6 +185,7 @@
     <type fullname="DoubleJackpotBullseyeUIButtonController" preserve="all" />
     <type fullname="DoubleJackpotBullseyeUIManager" preserve="all" />
     <type fullname="EffectMover" preserve="all" />
+    <type fullname="EnvironmentManager_FishGame" preserve="all" />
     <type fullname="EpicToonFX.ETFXLightFade" preserve="all" />
     <type fullname="EpicToonFX.ETFXPitchRandomizer" preserve="all" />
     <type fullname="EpicToonFX.ETFXRotation" preserve="all" />
@@ -633,6 +635,20 @@
     <type fullname="SuperBombSpinButton" preserve="all" />
     <type fullname="SuperBombUIButtonController" preserve="all" />
     <type fullname="SuperBombUIManager" preserve="all" />
+    <type fullname="SuperFruitBlastAutoSpinController" preserve="all" />
+    <type fullname="SuperFruitBlastBetController" preserve="all" />
+    <type fullname="SuperFruitBlastFreeSpinController" preserve="all" />
+    <type fullname="SuperFruitBlastGameSettings" preserve="all" />
+    <type fullname="SuperFruitBlastGameTransitionController" preserve="all" />
+    <type fullname="SuperFruitBlastPaylineController" preserve="all" />
+    <type fullname="SuperFruitBlastReelScript" preserve="all" />
+    <type fullname="SuperFruitBlastRulesPopupController" preserve="all" />
+    <type fullname="SuperFruitBlastSlotMachine" preserve="all" />
+    <type fullname="SuperFruitBlastSlotScript" preserve="all" />
+    <type fullname="SuperFruitBlastSoundManager" preserve="all" />
+    <type fullname="SuperFruitBlastSpinButton" preserve="all" />
+    <type fullname="SuperFruitBlastUIButtonController" preserve="all" />
+    <type fullname="SuperFruitBlastUIManager" preserve="all" />
     <type fullname="TenTimesWinsAutoSpinController" preserve="all" />
     <type fullname="TenTimesWinsBetController" preserve="all" />
     <type fullname="TenTimesWinsGameSettings" preserve="all" />
@@ -659,6 +675,25 @@
     <type fullname="TheGreenMachineDeluxeUIManager" preserve="all" />
     <type fullname="UIBlocker" preserve="all" />
     <type fullname="UIManager_RPS" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleAutoSpinController" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleBetController" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleFreeGameTransitionController" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleFreeSpinController" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleGameSettings" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleMiniGameManager" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleMiniGameReelScript" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleMiniGameSettings" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleMiniGameSlotMachine" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleMiniGameSlotScript" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyalePaylineController" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleReelScript" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleRulesPopupController" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleSlotMachine" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleSlotScript" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleSoundManager" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleSpinButton" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleUIButtonController" preserve="all" />
+    <type fullname="UltimateFireLinkRueRoyaleUIManager" preserve="all" />
     <type fullname="UnitySessionManager" preserve="all" />
     <type fullname="VegasSevenAutoSpinController" preserve="all" />
     <type fullname="VegasSevenBetController" preserve="all" />
@@ -840,6 +875,8 @@
     <type fullname="BuffaloXtraReelPowerSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="BuffaloXtraReelPowerSpinResult" preserve="nothing" serialized="true" />
     <type fullname="SecretsOfChristmasFreeSpinState" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkOlveraStreetFireLinkState" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRueRoyaleFireLinkState" preserve="nothing" serialized="true" />
     <type fullname="WildBuffaloSlotResource" preserve="nothing" serialized="true" />
     <type fullname="WildBuffaloSlotSettings" preserve="nothing" serialized="true" />
     <type fullname="WildBuffaloSoundItem" preserve="nothing" serialized="true" />
@@ -922,6 +959,13 @@
     <type fullname="CashMachineSoundItem" preserve="nothing" serialized="true" />
     <type fullname="CashMachineSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="CashMachinePaylineData" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRueRoyaleMiniGameSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRueRoyaleMiniGameSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRueRoyaleMiniGameSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRueRoyaleSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRueRoyaleSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRueRoyaleSoundItem" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRueRoyaleSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="QuickHitVolcanoSlotResource" preserve="nothing" serialized="true" />
     <type fullname="QuickHitVolcanoSoundItem" preserve="nothing" serialized="true" />
     <type fullname="QuickHitVolcanoSpinSettings" preserve="nothing" serialized="true" />
@@ -941,6 +985,7 @@
     <type fullname="FishData" preserve="nothing" serialized="true" />
     <type fullname="GunDatabase/GunLevel" preserve="nothing" serialized="true" />
     <type fullname="PatternFishGroup" preserve="nothing" serialized="true" />
+    <type fullname="EnvironmentManager_FishGame/Environment" preserve="nothing" serialized="true" />
     <type fullname="GameSettings_RPS/SoundItem" preserve="nothing" serialized="true" />
     <type fullname="SerializableClasses/RPSResponse" preserve="nothing" serialized="true" />
     <type fullname="FruitParadiseSlotResource" preserve="nothing" serialized="true" />
@@ -970,6 +1015,7 @@
     <type fullname="GoldGobblersSpinResult" preserve="nothing" serialized="true" />
     <type fullname="CartoonFX.CFXR_Effect/AnimatedLight" preserve="nothing" serialized="true" />
     <type fullname="CartoonFX.CFXR_Effect/CameraShake" preserve="nothing" serialized="true" />
+    <type fullname="DayData" preserve="nothing" serialized="true" />
     <type fullname="SpinResponse" preserve="nothing" serialized="true" />
     <type fullname="BiggerBassBonanzaSlotResource" preserve="nothing" serialized="true" />
     <type fullname="BiggerBassBonanzaSlotSettings" preserve="nothing" serialized="true" />
@@ -986,6 +1032,11 @@
     <type fullname="StinkinRichSoundItem" preserve="nothing" serialized="true" />
     <type fullname="StinkinRichSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="StinkinRichPaylineData" preserve="nothing" serialized="true" />
+    <type fullname="SuperFruitBlastSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="SuperFruitBlastSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="SuperFruitBlastSoundItem" preserve="nothing" serialized="true" />
+    <type fullname="SuperFruitBlastSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="SuperFruitBlastPaylineData" preserve="nothing" serialized="true" />
   </assembly>
   <assembly fullname="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="GlobleSoundManager" preserve="all" />
