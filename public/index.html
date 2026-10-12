@@ -404,7 +404,7 @@
           <div class="hint-arrow"></div>
           <div class="phone"></div>
         </div>
-        <div class="rotate-text">Please rotate your device</div>
+        <div class="rotate-text">Please rotate your device to landscape</div>
       </div>
     </div>
 
@@ -461,7 +461,10 @@
         }
       }
       var _maintenanceActive = false;
-      var buildVersion = "1778929172144";
+      var portraitGameMode = false;
+      var _portraitLayoutW = 0;
+      var _portraitLayoutH = 0;
+      var buildVersion = "1778929172122";
 
       var supportsClipReveal = !!(
         window.CSS &&
@@ -488,8 +491,9 @@
       // Unity WebGL loader reports download progress as 0..0.9 (see l(.9*...) in Builds.loader.js), then l(1) after init.
       // Map Unity loader callback only while network byte totals are unavailable.
       var UNITY_DOWNLOAD_PROGRESS_MAX = 0.9;
-      // Real bytes → 0–90% UI; after all build files finish → smooth 90–100%; hide loader then show canvas.
-      var UI_PROGRESS_DURING_DOWNLOAD_MAX = 0.9;
+      // Real bytes → 0–95% UI; Unity init → 95–99%; 100% only after createUnityInstance resolves.
+      var UI_PROGRESS_DURING_DOWNLOAD_MAX = 0.95;
+      var UI_PROGRESS_DURING_INIT_MAX = 0.99;
       var LOADER_HOLD_AT_100_MS = 600;
       // Smooth bar motion during download and init phases.
       var UI_DOWNLOAD_MAX_STEP_PER_FRAME = 0.01;
@@ -502,10 +506,10 @@
 
       // Real byte progress for all Build/ files (Unity's callback often hits 0.9 before wasm/loader finish).
       var unityAssetByteState = {
-        loader: { loaded: 0, headerTotal: 0, done: false },
-        data: { loaded: 0, headerTotal: 0, done: false },
-        framework: { loaded: 0, headerTotal: 0, done: false },
-        wasm: { loaded: 0, headerTotal: 0, done: false }
+        loader: { loaded: 0, headerTotal: 0, done: false, fromCache: false, seenNetworkTransfer: false, requestStarted: false },
+        data: { loaded: 0, headerTotal: 0, done: false, fromCache: false, seenNetworkTransfer: false, requestStarted: false },
+        framework: { loaded: 0, headerTotal: 0, done: false, fromCache: false, seenNetworkTransfer: false, requestStarted: false },
+        wasm: { loaded: 0, headerTotal: 0, done: false, fromCache: false, seenNetworkTransfer: false, requestStarted: false }
       };
       var lastNetworkBytesSum = 0;
       var lastNetworkSpeedTime = null;
@@ -513,7 +517,6 @@
       var _unityInstanceReady = false;
       var _loaderHidden = false;
       var _loaderHideScheduled = false;
-      var _loaderForceHideTimer = null;
 
       function unityMainAssetKeyFromPathname(pathname) {
         if (!pathname) return null;
@@ -546,20 +549,63 @@
         return true;
       }
 
+      function markAssetAsCached(st, size) {
+        st.fromCache = true;
+        st.done = true;
+        if (size > 0) {
+          st.headerTotal = Math.max(st.headerTotal, size);
+          st.loaded = Math.max(st.loaded, size);
+        } else if (st.headerTotal > 0) {
+          st.loaded = Math.max(st.loaded, st.headerTotal);
+        }
+      }
+
+      function isResourceTimingFromCache(entry) {
+        if (!entry || !(entry.responseEnd > 0)) return false;
+        if (entry.deliveryType === "cache") return true;
+        if (entry.deliveryType === "network") return false;
+        // Same-origin HTTP cache: a decoded body exists but nothing was transferred.
+        // Cross-origin without Timing-Allow-Origin reports 0/0 and is not a cache hit.
+        return entry.transferSize === 0 &&
+          (entry.encodedBodySize > 0 || entry.decodedBodySize > 0);
+      }
+
+      function shouldUseByteProgress() {
+        for (var i = 0; i < BUILD_ASSET_KEYS.length; i++) {
+          var st = unityAssetByteState[BUILD_ASSET_KEYS[i]];
+          if (st.fromCache) continue;
+          if (st.requestStarted || st.seenNetworkTransfer) return true;
+        }
+        return false;
+      }
+
       function getUnityNetworkLoadedRatio() {
         if (!buildLoadTrackingStarted) return null;
 
         var loaded = 0;
         var total = 0;
-        var started = false;
+        var known = 0;
         for (var i = 0; i < BUILD_ASSET_KEYS.length; i++) {
           var st = unityAssetByteState[BUILD_ASSET_KEYS[i]];
-          if (st.loaded > 0 || st.done || st.headerTotal > 0) started = true;
-          loaded += st.loaded;
-          total += assetPlannedBytes(st);
+          var planned = assetPlannedBytes(st);
+          if (planned <= 0 && st.loaded <= 0) continue;
+
+          var size = planned || st.loaded;
+          total += size;
+          known++;
+          if (st.fromCache) loaded += size;
+          else loaded += Math.min(st.loaded, size);
         }
-        if (!started || total <= 0) return null;
-        return Math.min(1, loaded / total);
+        if (known <= 0 || total <= 0) return null;
+        var ratio = Math.min(1, loaded / total);
+        // Until every build file has a known size, do not treat downloads as complete.
+        if (known < BUILD_ASSET_KEYS.length && !allBuildDownloadsComplete()) {
+          ratio = Math.min(ratio, known / BUILD_ASSET_KEYS.length);
+        }
+        if (!allBuildDownloadsComplete()) {
+          ratio = Math.min(ratio, 0.999);
+        }
+        return ratio;
       }
 
       function syncUnityAssetsFromResourceTiming() {
@@ -571,8 +617,14 @@
           var key = unityMainAssetKeyFromUrl(entry.name);
           if (!key) continue;
           var st = unityAssetByteState[key];
+          if (isResourceTimingFromCache(entry)) {
+            markAssetAsCached(st, entry.encodedBodySize || entry.decodedBodySize || 0);
+            touched = true;
+            continue;
+          }
           var wireSize = entry.transferSize > 0 ? entry.transferSize : 0;
           if (wireSize > 0) {
+            st.seenNetworkTransfer = true;
             st.headerTotal = Math.max(st.headerTotal, wireSize);
           } else if (entry.encodedBodySize > 0) {
             st.headerTotal = Math.max(st.headerTotal, entry.encodedBodySize);
@@ -627,7 +679,8 @@
         syncUnityAssetsFromResourceTiming();
         var sumL = 0;
         for (var j = 0; j < BUILD_ASSET_KEYS.length; j++) {
-          sumL += unityAssetByteState[BUILD_ASSET_KEYS[j]].loaded;
+          var st = unityAssetByteState[BUILD_ASSET_KEYS[j]];
+          if (!st.fromCache && st.seenNetworkTransfer) sumL += st.loaded;
         }
         updateNetworkDownloadSpeed(sumL);
         pushLoaderProgressFromNetworkIfNeeded();
@@ -635,25 +688,34 @@
 
       function wrapUnityMainAssetResponseBody(assetKey, res) {
         var st = unityAssetByteState[assetKey];
+        st.requestStarted = true;
         var cl = parseInt(res.headers.get("Content-Length") || "0", 10) || 0;
         if (cl > 0) st.headerTotal = Math.max(st.headerTotal, cl);
         notifyUnityMainAssetByteProgress();
 
-        if (!res || !res.body || typeof res.body.getReader !== "function") return res;
+        if (!res || !res.body || typeof res.body.getReader !== "function") {
+          notifyUnityMainAssetByteProgress();
+          return res;
+        }
 
         var reader = res.body.getReader();
         var monitored = new ReadableStream({
           pull: function (controller) {
             return reader.read().then(function (chunk) {
               if (chunk.done) {
-                st.done = true;
-                if (st.headerTotal > 0) st.loaded = Math.max(st.loaded, st.headerTotal);
-                else if (st.loaded > 0) st.headerTotal = st.loaded;
+                if (st.loaded > 0) {
+                  st.done = true;
+                  if (st.headerTotal > 0) st.loaded = Math.max(st.loaded, st.headerTotal);
+                  else st.headerTotal = st.loaded;
+                }
                 notifyUnityMainAssetByteProgress();
                 controller.close();
                 return;
               }
-              if (chunk.value && chunk.value.byteLength) st.loaded += chunk.value.byteLength;
+              if (chunk.value && chunk.value.byteLength) {
+                st.seenNetworkTransfer = true;
+                st.loaded += chunk.value.byteLength;
+              }
               notifyUnityMainAssetByteProgress();
               controller.enqueue(chunk.value);
             });
@@ -718,21 +780,26 @@
           if (key && String(xhr.__gvAssetMethod || "GET").toUpperCase() !== "HEAD") {
             buildLoadTrackingStarted = true;
             var st = unityAssetByteState[key];
+            st.requestStarted = true;
             xhr.addEventListener("loadstart", function () {
               notifyUnityMainAssetByteProgress();
             });
             xhr.addEventListener("progress", function (e) {
               if (e.lengthComputable && e.total > 0) {
+                st.seenNetworkTransfer = true;
                 st.headerTotal = Math.max(st.headerTotal, e.total);
                 st.loaded = Math.max(st.loaded, e.loaded);
               } else if (e.loaded > 0) {
+                st.seenNetworkTransfer = true;
                 st.loaded = Math.max(st.loaded, e.loaded);
               }
               notifyUnityMainAssetByteProgress();
             });
             xhr.addEventListener("load", function () {
-              st.done = true;
-              if (st.headerTotal > 0) st.loaded = Math.max(st.loaded, st.headerTotal);
+              if (st.loaded > 0) {
+                st.done = true;
+                if (st.headerTotal > 0) st.loaded = Math.max(st.loaded, st.headerTotal);
+              }
               notifyUnityMainAssetByteProgress();
             });
           }
@@ -877,19 +944,19 @@
           if (_unityInstanceReady) return 1.0;
           var p = Math.min(Math.max(unityProgress, 0), 1);
           if (p <= UNITY_DOWNLOAD_PROGRESS_MAX) return UI_PROGRESS_DURING_DOWNLOAD_MAX;
+          var initT = (p - UNITY_DOWNLOAD_PROGRESS_MAX) / (1 - UNITY_DOWNLOAD_PROGRESS_MAX);
           return UI_PROGRESS_DURING_DOWNLOAD_MAX +
-            ((p - UNITY_DOWNLOAD_PROGRESS_MAX) / (1 - UNITY_DOWNLOAD_PROGRESS_MAX)) *
-            (1 - UI_PROGRESS_DURING_DOWNLOAD_MAX);
+            initT * (UI_PROGRESS_DURING_INIT_MAX - UI_PROGRESS_DURING_DOWNLOAD_MAX);
         }
 
-        var netRatio = getUnityNetworkLoadedRatio();
-        var unityUi = mapUnityLoaderProgressToUi(unityProgress);
-        if (netRatio != null) {
-          var byteUi = netRatio * UI_PROGRESS_DURING_DOWNLOAD_MAX;
-          // Use whichever is further so the bar keeps moving during large file downloads.
-          return Math.min(Math.max(byteUi, unityUi), UI_PROGRESS_DURING_DOWNLOAD_MAX);
+        var unityUi = Math.min(mapUnityLoaderProgressToUi(unityProgress), UI_PROGRESS_DURING_DOWNLOAD_MAX);
+        // Network downloads: trust observed bytes so Unity's 0.9 callback cannot jump the bar.
+        // Browser cache / IndexedDB: bytes are often unavailable, so use Unity's callback.
+        if (shouldUseByteProgress()) {
+          var netRatio = getUnityNetworkLoadedRatio();
+          if (netRatio != null) return netRatio * UI_PROGRESS_DURING_DOWNLOAD_MAX;
         }
-        return Math.min(unityUi, UI_PROGRESS_DURING_DOWNLOAD_MAX);
+        return unityUi;
       }
 
       function prefetchBuildAssetSizes() {
@@ -932,6 +999,7 @@
         var target = _unityInstanceReady
           ? 1.0
           : combinedLoaderUiTarget(lastUnityLoaderProgressForUi);
+        if (!_unityInstanceReady && target >= 1) target = UI_PROGRESS_DURING_INIT_MAX;
         if (target < smoothProgress.targetValue) target = smoothProgress.targetValue;
         if (target < smoothProgress.currentValue) target = smoothProgress.currentValue;
         smoothProgress.setTarget(target);
@@ -947,6 +1015,7 @@
             return;
           }
           var target = combinedLoaderUiTarget(unityProgress);
+          if (!_unityInstanceReady && target >= 1) target = UI_PROGRESS_DURING_INIT_MAX;
           if (target < smoothProgress.currentValue) target = smoothProgress.currentValue;
           smoothProgress.setTarget(target);
           return;
@@ -968,7 +1037,7 @@
 
       function pollLoaderHideWhenReady() {
         if (_loaderHidden || _loaderHideScheduled) return;
-        if (!_postDownloadPhase || !_unityInstanceReady) return;
+        if (!_unityInstanceReady) return;
         if (!isLoaderUiAtFullPercent()) {
           requestAnimationFrame(pollLoaderHideWhenReady);
           return;
@@ -1103,10 +1172,6 @@
       canvas.style.opacity = "0";
       smoothProgress.setImmediate(0);
 
-      _loaderForceHideTimer = setTimeout(function () {
-        if (!_loaderHidden) hideUnityLoader();
-      }, 120000);
-
       /* ── iOS browser detection ── */
       var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
         || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -1160,10 +1225,22 @@
           return iosBestViewportHeight;
         }
 
-        function applyIOSCurrentViewportHeight() {
-          var h = updateUnityHeight();
+        function applyIOSCanvasHeight(h) {
+          if (portraitGameMode) {
+            applyPortraitCanvasLayout();
+            return;
+          }
           container.style.height = h + 'px';
           canvas.style.height = h + 'px';
+        }
+
+        function applyIOSCurrentViewportHeight() {
+          if (portraitGameMode) {
+            applyPortraitCanvasLayout();
+            return getIOSViewportHeight();
+          }
+          var h = updateUnityHeight();
+          applyIOSCanvasHeight(h);
           return h;
         }
 
@@ -1172,8 +1249,7 @@
           if (iosLastScrollY < IOS_REQUIRED_SCROLL_DISTANCE) return;
 
           var h = applyIOSBestViewportHeight();
-          container.style.height = h + 'px';
-          canvas.style.height = h + 'px';
+          applyIOSCanvasHeight(h);
 
           iosLockGame();
         }
@@ -1187,8 +1263,7 @@
           document.documentElement.classList.add('ios-game-started');
 
           var h = applyIOSBestViewportHeight();
-          container.style.height = h + 'px';
-          canvas.style.height = h + 'px';
+          applyIOSCanvasHeight(h);
 
           window.scrollTo(0, 0);
           hideLoaderFsHint();
@@ -1218,8 +1293,7 @@
           iosInitialViewportHeight = updateUnityHeight();
           iosBestViewportHeight = iosInitialViewportHeight;
           iosLastScrollY = 0;
-          container.style.height = iosInitialViewportHeight + 'px';
-          canvas.style.height = iosInitialViewportHeight + 'px';
+          applyIOSCanvasHeight(iosInitialViewportHeight);
           window.scrollTo(0, 0);
 
           hideLoaderFsHint();
@@ -1252,8 +1326,7 @@
             iosExitFakeFullscreenForPrompt();
           } else {
             document.documentElement.style.setProperty('--unity-height', currentH + 'px');
-            container.style.height = currentH + 'px';
-            canvas.style.height = currentH + 'px';
+            applyIOSCanvasHeight(currentH);
             if (iosSwipeHint) iosSwipeHint.classList.remove('show');
           }
         };
@@ -1296,8 +1369,7 @@
             var h = updateUnityHeight();
 
             if (_iosGameStarted) {
-              container.style.height = h + 'px';
-              canvas.style.height = h + 'px';
+              applyIOSCanvasHeight(h);
             } else {
               iosBestViewportHeight = Math.max(iosBestViewportHeight, h);
               document.documentElement.style.setProperty('--unity-height', iosBestViewportHeight + 'px');
@@ -1312,8 +1384,7 @@
             var h = updateUnityHeight();
 
             if (_iosGameStarted) {
-              container.style.height = h + 'px';
-              canvas.style.height = h + 'px';
+              applyIOSCanvasHeight(h);
             } else {
               iosBestViewportHeight = Math.max(iosBestViewportHeight, h);
               document.documentElement.style.setProperty('--unity-height', iosBestViewportHeight + 'px');
@@ -1347,12 +1418,13 @@
 
       function hideUnityLoader() {
         if (_loaderHidden || _maintenanceActive) return;
+        if (!_unityInstanceReady || !isLoaderUiAtFullPercent()) {
+          _loaderHideScheduled = false;
+          pollLoaderHideWhenReady();
+          return;
+        }
         _loaderHidden = true;
         _loaderHideScheduled = true;
-        if (_loaderForceHideTimer != null) {
-          clearTimeout(_loaderForceHideTimer);
-          _loaderForceHideTimer = null;
-        }
         smoothProgress.stop();
         loadingBar.style.display = "none";
         canvas.classList.remove("unity-canvas-loading");
@@ -1368,6 +1440,7 @@
           }
         }
         ensureVideoAutoplay();
+        syncGameModeCanvasLayout();
       }
 
       function syncMobileLoaderLayout() {
@@ -1380,6 +1453,88 @@
           : window.innerWidth;
         container.style.width = w + 'px';
         container.style.height = h + 'px';
+      }
+
+      function getVisibleGameViewport() {
+        var w;
+        var h;
+        var fs = typeof getFullscreenElement === "function" ? getFullscreenElement() : null;
+        if (fs) {
+          w = fs.clientWidth || window.innerWidth;
+          h = fs.clientHeight || window.innerHeight;
+          if ((!w || !h) && fs.getBoundingClientRect) {
+            var rect = fs.getBoundingClientRect();
+            w = rect.width;
+            h = rect.height;
+          }
+        } else {
+          w = (window.visualViewport && window.visualViewport.width)
+            ? window.visualViewport.width
+            : window.innerWidth;
+          h = (window.visualViewport && window.visualViewport.height)
+            ? window.visualViewport.height
+            : window.innerHeight;
+        }
+        if (isIOSBrowser && !isIOSStandalone && !_iosGameStarted &&
+            typeof iosBestViewportHeight === "number" && iosBestViewportHeight > h) {
+          h = iosBestViewportHeight;
+        }
+        return { w: Math.max(1, Math.round(w)), h: Math.max(1, Math.round(h)) };
+      }
+
+      function applyPortraitCanvasLayout() {
+        if (!isMobile || !portraitGameMode) return;
+        var size = getVisibleGameViewport();
+        var viewW = size.w;
+        var viewH = size.h;
+        var flipped = _portraitLayoutW > 0 &&
+          (viewW > viewH) !== (_portraitLayoutW > _portraitLayoutH);
+        if (!flipped && _portraitLayoutW > 0 &&
+            Math.abs(viewW - _portraitLayoutW) < 8 &&
+            Math.abs(viewH - _portraitLayoutH) < 8) {
+          return;
+        }
+        _portraitLayoutW = viewW;
+        _portraitLayoutH = viewH;
+
+        document.documentElement.style.setProperty('--unity-height', viewH + 'px');
+        container.style.width = viewW + 'px';
+        container.style.height = viewH + 'px';
+        canvas.style.width = viewW + 'px';
+        canvas.style.height = viewH + 'px';
+        canvas.style.removeProperty('object-fit');
+        canvas.style.removeProperty('max-width');
+        canvas.style.removeProperty('max-height');
+      }
+
+      function restoreLandscapeCanvasLayout() {
+        if (!isMobile) return;
+        _portraitLayoutW = 0;
+        _portraitLayoutH = 0;
+        canvas.style.removeProperty('width');
+        canvas.style.removeProperty('height');
+        canvas.style.removeProperty('object-fit');
+        canvas.style.removeProperty('max-width');
+        canvas.style.removeProperty('max-height');
+        container.style.removeProperty('display');
+        container.style.removeProperty('align-items');
+        container.style.removeProperty('justify-content');
+        if (_loaderHidden) {
+          container.style.removeProperty('width');
+          container.style.removeProperty('height');
+        }
+      }
+
+      function syncGameModeCanvasLayout() {
+        if (!isMobile) return;
+        if (portraitGameMode) {
+          applyPortraitCanvasLayout();
+        } else if (_portraitLayoutW || _portraitLayoutH || canvas.style.width) {
+          restoreLandscapeCanvasLayout();
+          syncMobileLoaderLayout();
+        } else {
+          syncMobileLoaderLayout();
+        }
       }
 
       if (isMobile) {
@@ -1429,6 +1584,7 @@
             if (hasRealFullscreenElement()) {
               realFullscreenBestViewportHeight = Math.max(realFullscreenBestViewportHeight, getVisibleViewportHeight());
               hideLoaderFsHint();
+              syncScreenOrientationLock();
             } else {
               realFullscreenPromptCooldownUntil = 0;
               showRealFullscreenPromptNow();
@@ -1563,6 +1719,7 @@
             window.unityInstance = unityInstance;
             _unityLoaded = true;
             _unityInstanceReady = true;
+            syncGameModeCanvasLayout();
             ensurePostDownloadRamp();
           }).catch(function () {
             showCasinoMaintenancePage();
@@ -1909,12 +2066,12 @@
       }
 
       function onFullscreenLayoutChange() {
+        syncScreenOrientationLock();
         ensureRotateOverlayPlacement();
         syncMobileLoaderLayout();
         updateFullscreenHintVisibility();
         checkOrientation();
-        setTimeout(checkOrientation, 120);
-        setTimeout(checkOrientation, 350);
+        recheckOrientationSoon();
       }
 
       document.addEventListener('fullscreenchange', onFullscreenLayoutChange);
@@ -2001,6 +2158,9 @@
 
       var rotateOverlay = document.getElementById("rotate-device");
       var rotateOverlayHome = document.body;
+      var _orientationRecheckEpoch = 0;
+      var _orientationLockEpoch = 0;
+      var _orientationCheckRaf = 0;
 
       function getFullscreenElement() {
         return document.fullscreenElement
@@ -2017,7 +2177,7 @@
         /* appendChild when needed: reparent into fullscreen subtree (top layer), or move to end
            so the overlay stacks above canvas/loader siblings added after it. */
         var p = rotateOverlay.parentNode;
-        if (p !== target || rotateOverlay.nextSibling) {
+        if (p !== target) {
           target.appendChild(rotateOverlay);
         }
       }
@@ -2026,39 +2186,142 @@
         document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
       }
 
+      function syncScreenOrientationLock() {
+        var so = window.screen && window.screen.orientation;
+        if (!so) return;
+        var epoch = ++_orientationLockEpoch;
+        try {
+          if (portraitGameMode) {
+            if (typeof so.unlock === "function") so.unlock();
+            if (getFullscreenElement() && typeof so.lock === "function") {
+              var anyLock = so.lock("any");
+              if (anyLock && typeof anyLock.catch === "function") {
+                anyLock.catch(function () {
+                  if (epoch !== _orientationLockEpoch || !portraitGameMode) return;
+                  try {
+                    var portraitLock = so.lock("portrait");
+                    if (portraitLock && typeof portraitLock.catch === "function") {
+                      portraitLock.catch(function () {});
+                    }
+                  } catch (e2) {}
+                });
+              }
+            }
+          } else if (getFullscreenElement() && typeof so.lock === "function") {
+            var landscapeLock = so.lock("landscape");
+            if (landscapeLock && typeof landscapeLock.catch === "function") {
+              landscapeLock.catch(function () {
+                if (epoch !== _orientationLockEpoch || portraitGameMode) return;
+              });
+            }
+          }
+        } catch (e) {}
+      }
+
       function isPortraitForRotateHint() {
-        if (typeof window.matchMedia === 'function' && window.matchMedia('(orientation: portrait)').matches) {
-          return true;
+        var size = getVisibleGameViewport();
+        var dimsPortrait = size.h > size.w;
+        var dimsLandscape = size.w > size.h;
+
+        // Physical device angle still updates in fullscreen when screen.orientation is locked.
+        var wo = window.orientation;
+        if (typeof wo === "number") {
+          if (wo === 0 || wo === 180) return true;
+          if ((wo === 90 || wo === -90 || wo === 270) && !dimsPortrait) return false;
         }
+
         try {
           var so = window.screen && window.screen.orientation;
           if (so) {
-            if (so.type && /portrait/i.test(so.type)) return true;
-            if (typeof so.angle === 'number' && (so.angle === 0 || so.angle === 180)) return true;
+            if (typeof so.angle === "number") {
+              var ang = ((so.angle % 360) + 360) % 360;
+              if ((ang === 0 || ang === 180) && !dimsLandscape) return true;
+              if ((ang === 90 || ang === 270) && dimsPortrait) return true;
+              if ((ang === 90 || ang === 270) && !dimsPortrait) return false;
+            }
+            if (so.type) {
+              if (/portrait/i.test(so.type)) return true;
+              if (/landscape/i.test(so.type) && !dimsPortrait) return false;
+            }
           }
         } catch (e) {}
-        var w = (window.visualViewport && window.visualViewport.width) ? window.visualViewport.width : window.innerWidth;
-        var h = (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight;
-        return h > w;
+
+        if (typeof window.matchMedia === "function") {
+          var mqPortrait = window.matchMedia("(orientation: portrait)").matches;
+          var mqLandscape = window.matchMedia("(orientation: landscape)").matches;
+          if (mqPortrait && !mqLandscape) return true;
+          // Locked fullscreen often keeps landscape matchMedia after a physical rotate.
+          if (mqLandscape && !mqPortrait && dimsPortrait) return true;
+          if (mqLandscape && !mqPortrait && !dimsPortrait) return false;
+        }
+
+        return dimsPortrait;
       }
 
       function setPortraitRotateActive(active) {
-        document.documentElement.classList.toggle('portrait-rotate-active', active);
+        var want = !!active;
+        var hasClass = document.documentElement.classList.contains('portrait-rotate-active');
+        var showing = !!(rotateOverlay && rotateOverlay.classList.contains('show'));
+        if (want === hasClass && want === showing) {
+          if (want) ensureRotateOverlayPlacement();
+          return;
+        }
+        document.documentElement.classList.toggle('portrait-rotate-active', want);
         if (!rotateOverlay) return;
-        ensureRotateOverlayPlacement();
-        rotateOverlay.classList.toggle('show', active);
+        if (want) {
+          var fsEl = getFullscreenElement();
+          var target = fsEl || rotateOverlayHome;
+          if (rotateOverlay.parentNode !== target || rotateOverlay.nextSibling) {
+            target.appendChild(rotateOverlay);
+          }
+          rotateOverlay.classList.add('show');
+          rotateOverlay.setAttribute('aria-hidden', 'false');
+          rotateOverlay.style.pointerEvents = 'auto';
+        } else {
+          rotateOverlay.classList.remove('show');
+          rotateOverlay.setAttribute('aria-hidden', 'true');
+          rotateOverlay.style.pointerEvents = 'none';
+        }
+      }
+
+      function recheckOrientationSoon() {
+        var epoch = ++_orientationRecheckEpoch;
+        [50, 150, 350, 600].forEach(function (ms) {
+          setTimeout(function () {
+            if (epoch !== _orientationRecheckEpoch) return;
+            checkOrientation();
+          }, ms);
+        });
+      }
+
+      function requestOrientationCheck() {
+        if (_orientationCheckRaf) return;
+        _orientationCheckRaf = requestAnimationFrame(function () {
+          _orientationCheckRaf = 0;
+          checkOrientation();
+        });
       }
 
       function checkOrientation() {
         setVh();
-        ensureRotateOverlayPlacement();
         var isMobileDevice =
           (navigator.userAgentData && navigator.userAgentData.mobile === true) ||
           /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
           (navigator.maxTouchPoints && navigator.maxTouchPoints > 1 && /MacIntel/i.test(navigator.platform));
 
         if (_maintenanceActive) return;
-        if (isMobileDevice && isPortraitForRotateHint()) {
+
+        var requiredLabel = portraitGameMode ? "portrait" : "landscape";
+        var rotateText = rotateOverlay ? rotateOverlay.querySelector(".rotate-text") : null;
+        var nextText = "Please rotate your device to " + requiredLabel;
+        if (rotateText && rotateText.textContent !== nextText) rotateText.textContent = nextText;
+        var rotateContent = rotateOverlay ? rotateOverlay.querySelector(".rotate-content") : null;
+        if (rotateContent) rotateContent.setAttribute("aria-label", nextText);
+
+        var isPortrait = isPortraitForRotateHint();
+        var needsRotate = isMobileDevice && (portraitGameMode ? !isPortrait : isPortrait);
+        var wasRotateActive = document.documentElement.classList.contains('portrait-rotate-active');
+        if (needsRotate) {
           setPortraitRotateActive(true);
           hideLoaderFsHint();
           var iosHnt = document.getElementById('ios-swipe-hint');
@@ -2068,7 +2331,7 @@
           if (container.style.visibility === 'hidden') {
             container.style.visibility = 'visible';
           }
-          if (isIOSBrowser && !isIOSStandalone && !_iosGameStarted) {
+          if (wasRotateActive && isIOSBrowser && !isIOSStandalone && !_iosGameStarted) {
             if (typeof iosExitFakeFullscreenForPrompt === 'function') {
               iosExitFakeFullscreenForPrompt();
             } else {
@@ -2083,24 +2346,50 @@
               if (iosHnt2) iosHnt2.classList.add('show');
             }
           }
-          try { updateFullscreenHintVisibility(); } catch (e) {}
+          if (wasRotateActive) {
+            try { updateFullscreenHintVisibility(); } catch (e) {}
+          }
         }
+        syncGameModeCanvasLayout();
       }
 
-      window.addEventListener("resize", checkOrientation);
+      window.addEventListener("resize", requestOrientationCheck);
       window.addEventListener("orientationchange", function () {
-        setTimeout(checkOrientation, 100);
-        setTimeout(checkOrientation, 300);
+        checkOrientation();
+        recheckOrientationSoon();
       });
       if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", checkOrientation);
+        window.visualViewport.addEventListener("resize", requestOrientationCheck);
       }
       try {
         if (window.screen && window.screen.orientation && window.screen.orientation.addEventListener) {
-          window.screen.orientation.addEventListener("change", checkOrientation);
+          window.screen.orientation.addEventListener("change", function () {
+            checkOrientation();
+            recheckOrientationSoon();
+          });
         }
       } catch (e) {}
       checkOrientation();
+
+      window.SetGamePortraitMode = function (enabled) {
+    portraitGameMode =
+        enabled === true ||
+        enabled === 1 ||
+        String(enabled).toLowerCase() === "true";
+
+    console.log("[SetGamePortraitMode]", {
+        enabled: enabled,
+        portraitGameMode: portraitGameMode
+    });
+
+    _portraitLayoutW = 0;
+    _portraitLayoutH = 0;
+    syncScreenOrientationLock();
+    if (portraitGameMode) applyPortraitCanvasLayout();
+    else restoreLandscapeCanvasLayout();
+    checkOrientation();
+    recheckOrientationSoon();
+};
 
       function getApiBase() {
         if (window.CASINO_API_BASE) return window.CASINO_API_BASE;

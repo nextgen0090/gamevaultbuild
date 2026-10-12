@@ -546,6 +546,20 @@
     <type fullname="SaharaRichesSoundManager" preserve="all" />
     <type fullname="SaharaRichesUIButtonController" preserve="all" />
     <type fullname="SaharaRichesUIManager" preserve="all" />
+    <type fullname="SantaAutoSpinController" preserve="all" />
+    <type fullname="SantaBetController" preserve="all" />
+    <type fullname="SantaBonusGameController" preserve="all" />
+    <type fullname="SantaBonusGift" preserve="all" />
+    <type fullname="SantaFreeGameTransitionController" preserve="all" />
+    <type fullname="SantaFreeSpinController" preserve="all" />
+    <type fullname="SantaGameSettings" preserve="all" />
+    <type fullname="SantaPaylineController" preserve="all" />
+    <type fullname="SantaReelScript" preserve="all" />
+    <type fullname="SantaRulesPopupController" preserve="all" />
+    <type fullname="SantaSlotMachine" preserve="all" />
+    <type fullname="SantaSlotScript" preserve="all" />
+    <type fullname="SantaSoundManager" preserve="all" />
+    <type fullname="SantaUIManager" preserve="all" />
     <type fullname="SecretsOfChristmasAutoSpinController" preserve="all" />
     <type fullname="SecretsOfChristmasBetController" preserve="all" />
     <type fullname="SecretsOfChristmasBonusGameController" preserve="all" />
@@ -675,6 +689,25 @@
     <type fullname="TheGreenMachineDeluxeUIManager" preserve="all" />
     <type fullname="UIBlocker" preserve="all" />
     <type fullname="UIManager_RPS" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetAutoSpinController" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetBetController" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetFreeGameTransitionController" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetFreeSpinController" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetGameSettings" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetMiniGameManager" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetMiniGameReelScript" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetMiniGameSettings" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetMiniGameSlotMachine" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetMiniGameSlotScript" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetPaylineController" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetReelScript" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetRulesPopupController" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetSlotMachine" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetSlotScript" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetSoundManager" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetSpinButton" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetUIButtonController" preserve="all" />
+    <type fullname="UltimateFireLinkOlveraStreetUIManager" preserve="all" />
     <type fullname="UltimateFireLinkRueRoyaleAutoSpinController" preserve="all" />
     <type fullname="UltimateFireLinkRueRoyaleBetController" preserve="all" />
     <type fullname="UltimateFireLinkRueRoyaleFreeGameTransitionController" preserve="all" />
@@ -775,6 +808,7 @@
     <type fullname="WolfMoonLinkSlotScript" preserve="all" />
     <type fullname="WolfMoonLinkSoundManager" preserve="all" />
     <type fullname="WolfMoonLinkUIManager" preserve="all" />
+    <type fullname="WorldSpaceAutoFit" preserve="all" />
     <type fullname="WorldSpaceUIButton" preserve="all" />
     <type fullname="ZombieParadiseAutoSpinController" preserve="all" />
     <type fullname="ZombieParadiseBetController" preserve="all" />
@@ -865,6 +899,13 @@
     <type fullname="TheGreenMachineDeluxeSlotResource" preserve="nothing" serialized="true" />
     <type fullname="TheGreenMachineDeluxeSoundItem" preserve="nothing" serialized="true" />
     <type fullname="TheGreenMachineDeluxeSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="SantaSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="SantaSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="SantaSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="SantaPaylineData" preserve="nothing" serialized="true" />
+    <type fullname="SecretsOfChristmasFreeSpinState" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkOlveraStreetFireLinkState" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRueRoyaleFireLinkState" preserve="nothing" serialized="true" />
     <type fullname="ImperialDiamondResource" preserve="nothing" serialized="true" />
     <type fullname="ImperialDiamondSoundItem" preserve="nothing" serialized="true" />
     <type fullname="ImperialDiamondSpinSettings" preserve="nothing" serialized="true" />
@@ -874,9 +915,6 @@
     <type fullname="BuffaloXtraReelPowerSoundItem" preserve="nothing" serialized="true" />
     <type fullname="BuffaloXtraReelPowerSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="BuffaloXtraReelPowerSpinResult" preserve="nothing" serialized="true" />
-    <type fullname="SecretsOfChristmasFreeSpinState" preserve="nothing" serialized="true" />
-    <type fullname="UltimateFireLinkOlveraStreetFireLinkState" preserve="nothing" serialized="true" />
-    <type fullname="UltimateFireLinkRueRoyaleFireLinkState" preserve="nothing" serialized="true" />
     <type fullname="WildBuffaloSlotResource" preserve="nothing" serialized="true" />
     <type fullname="WildBuffaloSlotSettings" preserve="nothing" serialized="true" />
     <type fullname="WildBuffaloSoundItem" preserve="nothing" serialized="true" />
@@ -939,6 +977,12 @@
     <type fullname="GoldRushGusPaylineData" preserve="nothing" serialized="true" />
     <type fullname="HexagonKenoGameSettings/SoundItem" preserve="nothing" serialized="true" />
     <type fullname="HexaKenoResponse" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkOlveraStreetMiniGameSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkOlveraStreetMiniGameSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkOlveraStreetMiniGameSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkOlveraStreetSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkOlveraStreetSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkOlveraStreetSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="SuperBallGameSettings/SoundItem" preserve="nothing" serialized="true" />
     <type fullname="SuperBallKenoResponse" preserve="nothing" serialized="true" />
     <type fullname="CashVaultMiniGameSlotResource" preserve="nothing" serialized="true" />
