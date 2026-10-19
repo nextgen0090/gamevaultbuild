@@ -3,23 +3,21 @@
   "name": "gamevaultbuild",
   "main": "src/index.js",
   "compatibility_date": "2026-05-18",
+
   "observability": {
     "enabled": true
   },
-  "build": {
-    "command": "node scripts/prepare-large-assets.mjs"
-  },
+
   "assets": {
-    "directory": "./public"
+    "directory": "./public",
+    "not_found_handling": "single-page-application"
   },
-  "r2_buckets": [
-    {
-      "binding": "GAME_ASSETS",
-      "bucket_name": "gamevault-unity-assets",
-      "remote": true
-    }
-  ],
+
   "compatibility_flags": [
     "nodejs_compat"
-  ]
+  ],
+
+  "vars": {
+    "ALLOWED_IPS": "137.59.226.231"
+  }
 }
