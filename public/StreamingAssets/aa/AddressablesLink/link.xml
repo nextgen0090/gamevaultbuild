@@ -196,6 +196,7 @@
     <type fullname="FeedbackStar" preserve="all" />
     <type fullname="FeedbackTextPreset" preserve="all" />
     <type fullname="Fish" preserve="all" />
+    <type fullname="FishCaughtNet" preserve="all" />
     <type fullname="FishDatabase" preserve="all" />
     <type fullname="FishGameSoundManager" preserve="all" />
     <type fullname="FishManager" preserve="all" />
@@ -276,6 +277,7 @@
     <type fullname="GameCatalogueController" preserve="all" />
     <type fullname="GameManager_RPS" preserve="all" />
     <type fullname="GameSettings_RPS" preserve="all" />
+    <type fullname="GameUiThemeUpdater" preserve="all" />
     <type fullname="GlobeUVScroller" preserve="all" />
     <type fullname="GoldenDragonAutoSpinController" preserve="all" />
     <type fullname="GoldenDragonBetController" preserve="all" />
@@ -364,6 +366,20 @@
     <type fullname="ImperialDiamondUIButtonController" preserve="all" />
     <type fullname="ImperialDiamondUIManager" preserve="all" />
     <type fullname="InputManager_RPS" preserve="all" />
+    <type fullname="InvadersPlanetMoolahAutoSpinController" preserve="all" />
+    <type fullname="InvadersPlanetMoolahBetController" preserve="all" />
+    <type fullname="InvadersPlanetMoolahFreeSpinAnimationEventRelay" preserve="all" />
+    <type fullname="InvadersPlanetMoolahFreeSpinController" preserve="all" />
+    <type fullname="InvadersPlanetMoolahFreeSpinTransitionController" preserve="all" />
+    <type fullname="InvadersPlanetMoolahGameSettings" preserve="all" />
+    <type fullname="InvadersPlanetMoolahPaylineController" preserve="all" />
+    <type fullname="InvadersPlanetMoolahReelScript" preserve="all" />
+    <type fullname="InvadersPlanetMoolahRulesPopupController" preserve="all" />
+    <type fullname="InvadersPlanetMoolahSlotMachine" preserve="all" />
+    <type fullname="InvadersPlanetMoolahSlotScript" preserve="all" />
+    <type fullname="InvadersPlanetMoolahSoundManager" preserve="all" />
+    <type fullname="InvadersPlanetMoolahUFOCascadeController" preserve="all" />
+    <type fullname="InvadersPlanetMoolahUIManager" preserve="all" />
     <type fullname="IrishPotLuckAutoSpinController" preserve="all" />
     <type fullname="IrishPotLuckBetController" preserve="all" />
     <type fullname="IrishPotLuckCharacterController" preserve="all" />
@@ -482,6 +498,7 @@
     <type fullname="PiratesOfTheCaribbeanUIButtonController" preserve="all" />
     <type fullname="PiratesOfTheCaribbeanUIManager" preserve="all" />
     <type fullname="PlayAnimationScript" preserve="all" />
+    <type fullname="PlayerDatabase" preserve="all" />
     <type fullname="PlayGameCardShiner" preserve="all" />
     <type fullname="ProfilePanelManager" preserve="all" />
     <type fullname="QuickHitVolcanoAutoSpinController" preserve="all" />
@@ -708,6 +725,25 @@
     <type fullname="UltimateFireLinkOlveraStreetSpinButton" preserve="all" />
     <type fullname="UltimateFireLinkOlveraStreetUIButtonController" preserve="all" />
     <type fullname="UltimateFireLinkOlveraStreetUIManager" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkAutoSpinController" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkBetController" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkFreeGameTransitionController" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkFreeSpinController" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkGameSettings" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkMiniGameManager" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkMiniGameReelScript" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkMiniGameSettings" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkMiniGameSlotMachine" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkMiniGameSlotScript" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkPaylineController" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkReelScript" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkRulesPopupController" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkSlotMachine" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkSlotScript" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkSoundManager" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkSpinButton" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkUIButtonController" preserve="all" />
+    <type fullname="UltimateFireLinkRiverWalkUIManager" preserve="all" />
     <type fullname="UltimateFireLinkRueRoyaleAutoSpinController" preserve="all" />
     <type fullname="UltimateFireLinkRueRoyaleBetController" preserve="all" />
     <type fullname="UltimateFireLinkRueRoyaleFreeGameTransitionController" preserve="all" />
@@ -793,6 +829,7 @@
     <type fullname="WildXTrioUIManager" preserve="all" />
     <type fullname="WipeAnimation" preserve="all" />
     <type fullname="WipeAnimation_OceanKing" preserve="all" />
+    <type fullname="WitchRandomMovement" preserve="all" />
     <type fullname="WolfMoonLinkAutoSpinController" preserve="all" />
     <type fullname="WolfMoonLinkBetController" preserve="all" />
     <type fullname="WolfMoonLinkBonusGameManager" preserve="all" />
@@ -847,6 +884,11 @@
     <type fullname="PandaFortuneSoundItem" preserve="nothing" serialized="true" />
     <type fullname="PandaFortuneSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="PandaFortunePaylineData" preserve="nothing" serialized="true" />
+    <type fullname="SecretsOfChristmasFreeSpinState" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkOlveraStreetFireLinkState" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRiverWalkFireLinkState" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRueRoyaleFireLinkState" preserve="nothing" serialized="true" />
+    <type fullname="WolfMoonLinkBonusState" preserve="nothing" serialized="true" />
     <type fullname="TenTimesWinsGameSettings/SoundItem" preserve="nothing" serialized="true" />
     <type fullname="TenTimesWinsSlotResource" preserve="nothing" serialized="true" />
     <type fullname="TenTimesWinsSpinSettings" preserve="nothing" serialized="true" />
@@ -870,7 +912,6 @@
     <type fullname="RedHotTrippleSoundItem" preserve="nothing" serialized="true" />
     <type fullname="RedHotTrippleSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="RedHotTripplePaylineData" preserve="nothing" serialized="true" />
-    <type fullname="WolfMoonLinkBonusState" preserve="nothing" serialized="true" />
     <type fullname="VegasSevenResource" preserve="nothing" serialized="true" />
     <type fullname="VegasSevenSoundItem" preserve="nothing" serialized="true" />
     <type fullname="VegasSevenSpinSettings" preserve="nothing" serialized="true" />
@@ -903,9 +944,6 @@
     <type fullname="SantaSlotSettings" preserve="nothing" serialized="true" />
     <type fullname="SantaSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="SantaPaylineData" preserve="nothing" serialized="true" />
-    <type fullname="SecretsOfChristmasFreeSpinState" preserve="nothing" serialized="true" />
-    <type fullname="UltimateFireLinkOlveraStreetFireLinkState" preserve="nothing" serialized="true" />
-    <type fullname="UltimateFireLinkRueRoyaleFireLinkState" preserve="nothing" serialized="true" />
     <type fullname="ImperialDiamondResource" preserve="nothing" serialized="true" />
     <type fullname="ImperialDiamondSoundItem" preserve="nothing" serialized="true" />
     <type fullname="ImperialDiamondSpinSettings" preserve="nothing" serialized="true" />
@@ -957,6 +995,11 @@
     <type fullname="IrishPotLuckSoundItem" preserve="nothing" serialized="true" />
     <type fullname="IrishPotLuckSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="IrishPotLuckPaylineData" preserve="nothing" serialized="true" />
+    <type fullname="InvadersPlanetMoolahSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="InvadersPlanetMoolahSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="InvadersPlanetMoolahSoundItem" preserve="nothing" serialized="true" />
+    <type fullname="InvadersPlanetMoolahSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="InvadersPlanetMoolahPaylineData" preserve="nothing" serialized="true" />
     <type fullname="ComeOnCashSlotResource" preserve="nothing" serialized="true" />
     <type fullname="ComeOnCashSoundItem" preserve="nothing" serialized="true" />
     <type fullname="ComeOnCashSpinSettings" preserve="nothing" serialized="true" />
@@ -982,6 +1025,7 @@
     <type fullname="UltimateFireLinkOlveraStreetMiniGameSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="UltimateFireLinkOlveraStreetSlotResource" preserve="nothing" serialized="true" />
     <type fullname="UltimateFireLinkOlveraStreetSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkOlveraStreetSoundItem" preserve="nothing" serialized="true" />
     <type fullname="UltimateFireLinkOlveraStreetSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="SuperBallGameSettings/SoundItem" preserve="nothing" serialized="true" />
     <type fullname="SuperBallKenoResponse" preserve="nothing" serialized="true" />
@@ -1010,6 +1054,12 @@
     <type fullname="UltimateFireLinkRueRoyaleSlotSettings" preserve="nothing" serialized="true" />
     <type fullname="UltimateFireLinkRueRoyaleSoundItem" preserve="nothing" serialized="true" />
     <type fullname="UltimateFireLinkRueRoyaleSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRiverWalkMiniGameSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRiverWalkMiniGameSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRiverWalkMiniGameSpinSettings" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRiverWalkSlotResource" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRiverWalkSlotSettings" preserve="nothing" serialized="true" />
+    <type fullname="UltimateFireLinkRiverWalkSpinSettings" preserve="nothing" serialized="true" />
     <type fullname="QuickHitVolcanoSlotResource" preserve="nothing" serialized="true" />
     <type fullname="QuickHitVolcanoSoundItem" preserve="nothing" serialized="true" />
     <type fullname="QuickHitVolcanoSpinSettings" preserve="nothing" serialized="true" />
@@ -1030,6 +1080,7 @@
     <type fullname="GunDatabase/GunLevel" preserve="nothing" serialized="true" />
     <type fullname="PatternFishGroup" preserve="nothing" serialized="true" />
     <type fullname="EnvironmentManager_FishGame/Environment" preserve="nothing" serialized="true" />
+    <type fullname="PlayerDatabase/PlayerSettings" preserve="nothing" serialized="true" />
     <type fullname="GameSettings_RPS/SoundItem" preserve="nothing" serialized="true" />
     <type fullname="SerializableClasses/RPSResponse" preserve="nothing" serialized="true" />
     <type fullname="FruitParadiseSlotResource" preserve="nothing" serialized="true" />
@@ -1060,6 +1111,7 @@
     <type fullname="CartoonFX.CFXR_Effect/AnimatedLight" preserve="nothing" serialized="true" />
     <type fullname="CartoonFX.CFXR_Effect/CameraShake" preserve="nothing" serialized="true" />
     <type fullname="DayData" preserve="nothing" serialized="true" />
+    <type fullname="GameUiThemeUpdater/AffectedObjects" preserve="nothing" serialized="true" />
     <type fullname="SpinResponse" preserve="nothing" serialized="true" />
     <type fullname="BiggerBassBonanzaSlotResource" preserve="nothing" serialized="true" />
     <type fullname="BiggerBassBonanzaSlotSettings" preserve="nothing" serialized="true" />

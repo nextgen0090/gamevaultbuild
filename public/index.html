@@ -49,16 +49,27 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
-    <meta name="casino-api-base" content="https://gamevault222.com">
-    <meta name="casino-socket-base" content="https://gamevault222.com">
+    <meta name="casino-api-base" content="">
+    <meta name="casino-socket-base" content="">
     <script>
     (function () {
-      var SOCKET_BASE = 'wss://gamevault222.com';
+      var API_BASE = 'https://gamevault222.com';
+     // var API_BASE = 'http://localhost:5036';  
+      window.CASINO_API_BASE = API_BASE;
+
+      var apiMeta = document.querySelector('meta[name="casino-api-base"]');
+      var socketMeta = document.querySelector('meta[name="casino-socket-base"]');
+      if (apiMeta) apiMeta.setAttribute('content', API_BASE);
+      if (socketMeta) socketMeta.setAttribute('content', API_BASE);
+
+      var socketBase = API_BASE.replace(/^http/i, 'ws');
+      var host = API_BASE.replace(/^https?:\/\//i, '').replace(/\/.*$/, '');
+      var escapedHost = host.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       var NativeWS = window.WebSocket;
       function rewriteWsUrl(url) {
         if (typeof url !== 'string') return url;
-        url = url.replace(/^wss:\/\/gamevault222\.com/i, SOCKET_BASE);
-        url = url.replace(/^ws:\/\/gamevault222\.com/i, SOCKET_BASE.replace(/^wss/, 'ws'));
+        url = url.replace(new RegExp('^wss://' + escapedHost, 'i'), socketBase);
+        url = url.replace(new RegExp('^ws://' + escapedHost, 'i'), socketBase.replace(/^wss/i, 'ws'));
         url = url.replace(/\/ws\/user-session/i, '/ws/session');
         return url;
       }
@@ -464,7 +475,7 @@
       var portraitGameMode = false;
       var _portraitLayoutW = 0;
       var _portraitLayoutH = 0;
-      var buildVersion = "1778929172155";
+      var buildVersion = "1778929172122";
 
       var supportsClipReveal = !!(
         window.CSS &&
@@ -1918,10 +1929,28 @@
         }
       }
 
+      function SendGameUiThemeToUnity(requestJson) {
+        var callerId = '';
+        try {
+          var request = typeof requestJson === 'string' ? JSON.parse(requestJson) : (requestJson || {});
+          callerId = request.callerId || '';
+        } catch (e) {}
+
+        var payload = JSON.stringify({
+          callerId: callerId,
+          responseString: getStoredGameUiTheme()
+        });
+
+        if (window.unityInstance) {
+          window.unityInstance.SendMessage('UnityJsBridge', 'ReceiveResponseFromJs', payload);
+        }
+      }
+
       window.onLoginStatusChanged = onLoginStatusChanged;
       window.onTokenReceived = onTokenReceived;
       window.getToken = getToken;
       window.clearStoredToken = clearStoredToken;
+      window.SendGameUiThemeToUnity = SendGameUiThemeToUnity;
 
       var loaderFsHint = document.getElementById("loader-fs-hint");
       var __fsHintVisible = false;
@@ -2395,12 +2424,40 @@
         if (window.CASINO_API_BASE) return window.CASINO_API_BASE;
         var metaEl = document.querySelector('meta[name="casino-api-base"]');
         if (metaEl && metaEl.content) return metaEl.content.trim();
-        return 'https://gamevault222.com';
-        // return 'http://localhost:5036';
+        return '';
       }
 
       var MAINTENANCE_HTML_KEY = 'casino-maintenance-html';
       var MAINTENANCE_VERSION_KEY = 'casino-maintenance-html-version';
+      var MAINTENANCE_STATUS_KEY = 'casino-maintenance-status';
+
+      function saveLatestMaintenanceStatus(json) {
+        try {
+          localStorage.setItem(MAINTENANCE_STATUS_KEY, JSON.stringify(json));
+        } catch (e) {}
+      }
+
+      function getStoredGameUiTheme() {
+        try {
+          var raw = localStorage.getItem(MAINTENANCE_STATUS_KEY);
+          if (!raw) return '';
+          var rows = JSON.parse(raw);
+          if (!Array.isArray(rows) && rows && typeof rows === 'object') {
+            rows = rows.data || rows.items || rows.rows || rows.result || rows.value;
+          }
+          if (!Array.isArray(rows)) return '';
+
+          for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            if (!row || typeof row.gameUiTheme !== 'string' || !row.gameUiTheme) continue;
+            var mtype = row.maintenanceType || row.maintenance_type || row.MaintenanceType || '';
+            if (/^games?$/i.test(String(mtype).trim())) return row.gameUiTheme;
+          }
+          return '';
+        } catch (e) {
+          return '';
+        }
+      }
 
       function removeLegacyMaintenanceCache() {
         try {
@@ -2570,7 +2627,7 @@
       function fetchMaintenanceStatus(attempt) {
         var base = getApiBase();
         var cacheBust = '_cb=' + Date.now();
-        return fetch(base + '/api/maintenance?' + cacheBust, {
+        return fetch(base + '/api/maintenance?isDashboard=false&' + cacheBust, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -2601,6 +2658,7 @@
 
       function checkMaintenance() {
         fetchMaintenanceStatus(1).then(function (json) {
+          saveLatestMaintenanceStatus(json);
           if (isCasinoMaintenanceActive(json)) {
             showCasinoMaintenancePage();
           } else {
