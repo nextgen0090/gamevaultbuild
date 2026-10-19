@@ -1080,6 +1080,7 @@
     <type fullname="GunDatabase/GunLevel" preserve="nothing" serialized="true" />
     <type fullname="PatternFishGroup" preserve="nothing" serialized="true" />
     <type fullname="EnvironmentManager_FishGame/Environment" preserve="nothing" serialized="true" />
+    <type fullname="GameUiThemeUpdater/AffectedObjects" preserve="nothing" serialized="true" />
     <type fullname="PlayerDatabase/PlayerSettings" preserve="nothing" serialized="true" />
     <type fullname="GameSettings_RPS/SoundItem" preserve="nothing" serialized="true" />
     <type fullname="SerializableClasses/RPSResponse" preserve="nothing" serialized="true" />
@@ -1111,7 +1112,6 @@
     <type fullname="CartoonFX.CFXR_Effect/AnimatedLight" preserve="nothing" serialized="true" />
     <type fullname="CartoonFX.CFXR_Effect/CameraShake" preserve="nothing" serialized="true" />
     <type fullname="DayData" preserve="nothing" serialized="true" />
-    <type fullname="GameUiThemeUpdater/AffectedObjects" preserve="nothing" serialized="true" />
     <type fullname="SpinResponse" preserve="nothing" serialized="true" />
     <type fullname="BiggerBassBonanzaSlotResource" preserve="nothing" serialized="true" />
     <type fullname="BiggerBassBonanzaSlotSettings" preserve="nothing" serialized="true" />
